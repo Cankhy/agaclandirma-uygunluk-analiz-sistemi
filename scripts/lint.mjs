@@ -48,10 +48,10 @@ try {
   fail(`GeoJSON parse error: ${error.message}`);
 }
 
-if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && html.includes('id="report-preview"')) {
-  ok("HTML includes map, species recommendation, and report modules");
+if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && html.includes('id="report-preview"') && html.includes('id="live-data-grid"')) {
+  ok("HTML includes map, species recommendation, live data, and report modules");
 } else {
-  fail("HTML must include map, species recommendation, and report modules");
+  fail("HTML must include map, species recommendation, live data, and report modules");
 }
 
 if (html.includes("<link rel=\"canonical\"") && html.includes("<link rel=\"icon\"") && html.includes("<link rel=\"manifest\"")) {
@@ -85,10 +85,10 @@ if (geojson?.type === "FeatureCollection" && Array.isArray(geojson.features) && 
   fail("GeoJSON must include at least 6 candidate sites");
 }
 
-if (js.includes('fetch("data/afforestation-sites.geojson")') && js.includes("speciesCatalog") && js.includes("calculateSite")) {
-  ok("JavaScript loads local data and includes suitability logic");
+if (js.includes('fetch("data/afforestation-sites.geojson")') && js.includes("speciesCatalog") && js.includes("calculateSite") && js.includes("https://api.open-meteo.com/v1/forecast") && js.includes("https://rest.isric.org/soilgrids/v2.0/properties/query")) {
+  ok("JavaScript loads local, weather, soil, and suitability data");
 } else {
-  fail("JavaScript must load GeoJSON and include suitability logic");
+  fail("JavaScript must load GeoJSON, live weather, soil data, and include suitability logic");
 }
 
 if (readme.includes("Ağaçlandırma Uygunluk Analiz Sistemi") && readme.includes("npm run lint")) {

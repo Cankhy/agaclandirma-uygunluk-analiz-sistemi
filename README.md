@@ -9,6 +9,8 @@ Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi 
 ## Öne Çıkan Modüller
 
 - Harita merkezli aday saha analizi
+- Open-Meteo ile canlı hava göstergeleri
+- ISRIC SoilGrids ile aktif saha toprak tahmini
 - Uygunluk, erozyon, yağış ve erişim katmanları
 - Normal yıl, kurak yıl ve yüksek yağış yılı senaryoları
 - Eğim, bakı, yağış, toprak derinliği, erozyon ve erişim kriterleri
@@ -48,6 +50,15 @@ npm run lint
 - `data/afforestation-sites.geojson`: Aday ağaçlandırma sahaları ve saha kriterleri
 
 Veri setinde farklı iklim, topoğrafya, erozyon ve erişim karakterlerine sahip örnek sahalar bulunur. Sahalar prototip amacıyla modellenmiştir.
+
+## Gerçek Veri Kaynakları
+
+- Open-Meteo Forecast API: canlı sıcaklık, nem, yağış ve rüzgâr göstergeleri
+- ISRIC SoilGrids v2.0: aktif saha için pH, kil, kum ve organik karbon tahminleri
+- Copernicus DEM: eğim/topografya analizi için referans sayısal yükseklik modeli
+- CORINE Land Cover: arazi örtüsü ve kullanım sınıfları için referans katman
+
+Canlı servisler yanıt vermezse uygulama yerel GeoJSON verisiyle çalışmaya devam eder. Böylece demo yayında bozulmaz.
 
 ## Analiz Mantığı
 

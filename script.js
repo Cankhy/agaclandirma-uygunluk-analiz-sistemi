@@ -22,6 +22,7 @@ const elements = {
   avgScore: document.querySelector("#avg-score"),
   prioritySpecies: document.querySelector("#priority-species"),
   riskCount: document.querySelector("#risk-count"),
+  liveDataGrid: document.querySelector("#live-data-grid"),
   executiveGrid: document.querySelector("#executive-grid"),
   resultTitle: document.querySelector("#result-title"),
   scoreValue: document.querySelector("#score-value"),
@@ -155,6 +156,9 @@ let activeSiteId = fallbackSites[0].id;
 let map;
 let siteLayer;
 let activeLayer = "suitability";
+let liveWeatherBySite = {};
+let soilDataBySite = {};
+let liveDataState = { weather: "loading", soil: "waiting", updatedAt: null };
 
 const scenarioConfig = {
   normal: { label: "Normal yıl", rainfall: 0, score: 0, note: "Uzun dönem ortalamalarına yakın saha koşulları." },
@@ -202,6 +206,24 @@ function applyScenario(site) {
   };
 }
 
+function getSiteCentroid(site) {
+  const ring = site.geometry?.[0] ?? [];
+  const totals = ring.reduce((sum, point) => ({ lon: sum.lon + point[0], lat: sum.lat + point[1] }), { lon: 0, lat: 0 });
+  return {
+    lon: totals.lon / Math.max(ring.length, 1),
+    lat: totals.lat / Math.max(ring.length, 1)
+  };
+}
+
+function getWeatherAdjustment(site) {
+  const weather = liveWeatherBySite[site.id];
+  if (!weather) return 0;
+  const heatPenalty = weather.temperature >= 34 ? -3 : weather.temperature >= 30 ? -1 : 0;
+  const humidityPenalty = weather.humidity <= 25 ? -3 : weather.humidity <= 35 ? -1 : 0;
+  const rainBoost = weather.precipitation >= 1 ? 2 : 0;
+  return heatPenalty + humidityPenalty + rainBoost;
+}
+
 function calculateSite(site) {
   const scenarioSite = applyScenario(site);
   const factors = {
@@ -218,7 +240,7 @@ function calculateSite(site) {
   };
   const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
   const weightedScore = Math.round(Object.entries(factors).reduce((sum, [key, value]) => sum + value * weights[key], 0) / totalWeight);
-  const score = clamp(weightedScore + scenarioSite.scenarioScoreBoost, 18, 98);
+  const score = clamp(weightedScore + scenarioSite.scenarioScoreBoost + getWeatherAdjustment(scenarioSite), 18, 98);
   return { ...scenarioSite, factors, weights, score, classInfo: classify(score) };
 }
 
@@ -277,6 +299,19 @@ function renderHero(active, calculatedSites) {
   elements.riskCount.textContent = riskCount;
 }
 
+function renderLiveData(active) {
+  const weather = liveWeatherBySite[active.id];
+  const soil = soilDataBySite[active.id];
+  const updatedAt = liveDataState.updatedAt
+    ? new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" }).format(liveDataState.updatedAt)
+    : "bekleniyor";
+  elements.liveDataGrid.innerHTML = `
+    <article class="live-data-card"><span class="table-head">Hava verisi</span><strong>${weather ? `${weather.temperature}°C` : "Bekleniyor"}</strong><p>${weather ? `%${weather.humidity} nem · ${weather.precipitation} mm yağış · ${weather.wind} km/sa rüzgâr` : "Open-Meteo bağlantısı kuruluyor."}</p></article>
+    <article class="live-data-card"><span class="table-head">Toprak tahmini</span><strong>${soil ? `pH ${soil.ph}` : "Bekleniyor"}</strong><p>${soil ? `Kil ${soil.clay} g/kg · kum ${soil.sand} g/kg · organik karbon ${soil.soc} dg/kg` : "Aktif saha için SoilGrids sorgusu hazırlanıyor."}</p></article>
+    <article class="live-data-card"><span class="table-head">Güncelleme</span><strong>${updatedAt}</strong><p>Canlı değerler erişilemezse yerel GeoJSON modeli güvenli yedek olarak kullanılır.</p></article>
+  `;
+}
+
 function renderExecutive(active, calculatedSites) {
   const best = calculatedSites[0];
   const conditional = calculatedSites.filter((site) => site.classInfo.tone === "medium").length;
@@ -315,11 +350,13 @@ function getFeasibility(active) {
 
 function renderCost(active) {
   const feasibility = getFeasibility(active);
+  const weather = liveWeatherBySite[active.id];
+  const liveNote = weather ? `Canlı sıcaklık ${weather.temperature}°C ve nem %${weather.humidity}.` : active.scenarioNote;
   elements.costGrid.innerHTML = `
     <article class="cost-card"><span class="table-head">Uygulama endeksi</span><strong>${feasibility.costIndex}/100</strong><p>${feasibility.riskLabel}</p></article>
     <article class="cost-card"><span class="table-head">Arazi zorluğu</span><strong>${feasibility.terrainDifficulty}/100</strong><p>Eğim ve yol erişimi birlikte hesaplandı.</p></article>
     <article class="cost-card"><span class="table-head">Bakım ihtiyacı</span><strong>${feasibility.maintenanceNeed}/100</strong><p>İklim, toprak ve erozyon baskısına göre üretildi.</p></article>
-    <article class="cost-card"><span class="table-head">Öncelik kararı</span><strong>${active.score >= 76 ? "Programla" : active.score >= 58 ? "İyileştir" : "Beklet"}</strong><p>${active.scenarioNote}</p></article>
+    <article class="cost-card"><span class="table-head">Öncelik kararı</span><strong>${active.score >= 76 ? "Programla" : active.score >= 58 ? "İyileştir" : "Beklet"}</strong><p>${liveNote}</p></article>
   `;
 }
 
@@ -388,6 +425,8 @@ function renderCompare(calculatedSites) {
 
 function renderReport(active) {
   const species = getRecommendedSpecies(active)[0];
+  const weather = liveWeatherBySite[active.id];
+  const soil = soilDataBySite[active.id];
   elements.reportPreview.innerHTML = `
     <strong>${active.name} için uygulama değerlendirmesi</strong>
     <p>${active.district} hattında yer alan saha ${active.score}/100 uygunluk skoru ile ${active.classInfo.label.toLowerCase()} sınıfındadır.</p>
@@ -396,6 +435,8 @@ function renderReport(active) {
       <article class="report-row"><span>Yağış</span><strong>${active.rainfall} mm</strong></article>
       <article class="report-row"><span>Toprak</span><strong>${active.soilDepth} cm</strong></article>
       <article class="report-row"><span>Önerilen tür</span><strong>${species?.name ?? "-"}</strong></article>
+      <article class="report-row"><span>Canlı hava</span><strong>${weather ? `${weather.temperature}°C / %${weather.humidity}` : "Bekleniyor"}</strong></article>
+      <article class="report-row"><span>SoilGrids</span><strong>${soil ? `pH ${soil.ph}` : "Bekleniyor"}</strong></article>
     </div>
   `;
 }
@@ -424,6 +465,8 @@ function getReportText() {
     `Uygulama zorluğu: ${getFeasibility(active).costIndex}/100`,
     `Bakım ihtiyacı: ${getFeasibility(active).maintenanceNeed}/100`,
     `Senaryo: ${active.scenarioLabel}`,
+    `Canlı hava: ${liveWeatherBySite[active.id] ? `${liveWeatherBySite[active.id].temperature}°C, %${liveWeatherBySite[active.id].humidity} nem` : "veri bekleniyor"}`,
+    `SoilGrids: ${soilDataBySite[active.id] ? `pH ${soilDataBySite[active.id].ph}, kil ${soilDataBySite[active.id].clay} g/kg` : "veri bekleniyor"}`,
     "",
     "Uygulama notu:",
     active.classInfo.tone === "high"
@@ -507,6 +550,7 @@ function renderAll() {
   const active = calculateSite(getActiveInputSite());
   const calculatedSites = getCalculatedSites();
   renderHero(active, calculatedSites);
+  renderLiveData(active);
   renderExecutive(active, calculatedSites);
   renderScore(active);
   renderCost(active);
@@ -516,6 +560,68 @@ function renderAll() {
   renderCompare(calculatedSites);
   renderReport(active);
   renderMap(calculatedSites);
+}
+
+async function loadLiveWeather() {
+  try {
+    const centroids = sites.map((site) => getSiteCentroid(site));
+    const params = new URLSearchParams({
+      latitude: centroids.map((point) => point.lat.toFixed(5)).join(","),
+      longitude: centroids.map((point) => point.lon.toFixed(5)).join(","),
+      current: "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
+      timezone: "Europe/Istanbul"
+    });
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+    const payload = await response.json();
+    const rows = Array.isArray(payload) ? payload : [payload];
+    liveWeatherBySite = Object.fromEntries(rows.map((row, index) => [
+      sites[index].id,
+      {
+        temperature: Math.round(row.current?.temperature_2m ?? 0),
+        humidity: Math.round(row.current?.relative_humidity_2m ?? 0),
+        precipitation: Number(row.current?.precipitation ?? 0),
+        wind: Math.round(row.current?.wind_speed_10m ?? 0)
+      }
+    ]));
+    liveDataState.weather = "ready";
+    liveDataState.updatedAt = new Date();
+  } catch (error) {
+    console.warn("Open-Meteo verisi alınamadı:", error);
+    liveDataState.weather = "error";
+  }
+}
+
+function extractSoilValue(payload, property) {
+  const layer = payload?.properties?.layers?.find((item) => item.name === property);
+  return layer?.depths?.[0]?.values?.mean ?? null;
+}
+
+async function loadSoilDataForActiveSite() {
+  const active = sites.find((site) => site.id === activeSiteId);
+  if (!active || soilDataBySite[active.id]) return;
+  liveDataState.soil = "loading";
+  try {
+    const centroid = getSiteCentroid(active);
+    const params = new URLSearchParams({
+      lon: centroid.lon.toFixed(5),
+      lat: centroid.lat.toFixed(5),
+      property: "phh2o,clay,sand,soc",
+      depth: "0-5cm",
+      value: "mean"
+    });
+    const response = await fetch(`https://rest.isric.org/soilgrids/v2.0/properties/query?${params.toString()}`);
+    const payload = await response.json();
+    soilDataBySite[active.id] = {
+      ph: ((extractSoilValue(payload, "phh2o") ?? 700) / 100).toFixed(1),
+      clay: extractSoilValue(payload, "clay") ?? "-",
+      sand: extractSoilValue(payload, "sand") ?? "-",
+      soc: extractSoilValue(payload, "soc") ?? "-"
+    };
+    liveDataState.soil = "ready";
+  } catch (error) {
+    console.warn("SoilGrids verisi alınamadı:", error);
+    liveDataState.soil = "error";
+  }
 }
 
 document.querySelectorAll("[data-jump]").forEach((button) => {
@@ -529,6 +635,7 @@ Object.values(inputs).forEach((input) => {
     if (input === inputs.siteSelect) {
       activeSiteId = input.value;
       syncInputsFromSite(sites.find((site) => site.id === activeSiteId));
+      loadSoilDataForActiveSite().then(renderAll);
     }
     renderAll();
   });
@@ -556,6 +663,9 @@ async function init() {
   populateSiteSelect();
   syncInputsFromSite(sites[0]);
   createMap();
+  renderAll();
+  await loadLiveWeather();
+  await loadSoilDataForActiveSite();
   renderAll();
 }
 

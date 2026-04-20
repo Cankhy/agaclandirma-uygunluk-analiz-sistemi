@@ -509,9 +509,46 @@ h2 {
 .cost-grid,
 .timeline-list,
 .compare-grid,
-.compare-metrics {
+.compare-metrics,
+.live-data-grid,
+.source-list {
   display: grid;
   gap: 14px;
+}
+
+.live-data-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.source-list {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.live-data-card,
+.source-list article {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+}
+
+.live-data-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.35rem;
+}
+
+.live-data-card p,
+.source-list p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.source-list span {
+  font-weight: 900;
 }
 
 .operation-grid {
@@ -856,6 +893,8 @@ a:focus-visible {
   .executive-grid,
   .operation-grid,
   .compare-grid,
+  .live-data-grid,
+  .source-list,
   .report-grid,
   .assurance-panel {
     grid-template-columns: 1fr;
