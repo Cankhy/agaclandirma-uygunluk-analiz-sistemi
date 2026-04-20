@@ -61,6 +61,10 @@
     <main class="page-content">
       <section class="metric-strip" aria-label="Genel özet">
         <article>
+          <span id="total-sites">0</span>
+          <p>Toplam aday saha</p>
+        </article>
+        <article>
           <span id="hero-score">--</span>
           <p>Seçili saha skoru</p>
         </article>
@@ -75,6 +79,10 @@
         <article>
           <span id="priority-species">-</span>
           <p>Önerilen tür</p>
+        </article>
+        <article>
+          <span id="risk-count">0</span>
+          <p>İyileştirme isteyen saha</p>
         </article>
       </section>
 
@@ -119,6 +127,12 @@
               <h2>Aday ağaçlandırma alanları</h2>
             </div>
             <p class="panel-note">Poligona tıkla; skor, tür önerisi, model girdileri ve rapor otomatik güncellensin.</p>
+          </div>
+          <div class="map-toolbar" aria-label="Harita katmanları">
+            <button class="layer-toggle is-active" type="button" data-layer="suitability">Uygunluk</button>
+            <button class="layer-toggle" type="button" data-layer="erosion">Erozyon</button>
+            <button class="layer-toggle" type="button" data-layer="rainfall">Yağış</button>
+            <button class="layer-toggle" type="button" data-layer="access">Erişim</button>
           </div>
           <div class="map-legend">
             <span><i class="legend high"></i>Yüksek</span>
@@ -168,6 +182,14 @@
           </div>
 
           <div class="control-grid">
+            <label>
+              İklim senaryosu
+              <select id="scenario-select">
+                <option value="normal">Normal yıl</option>
+                <option value="dry">Kurak yıl</option>
+                <option value="wet">Yüksek yağış yılı</option>
+              </select>
+            </label>
             <label>
               Saha profili
               <select id="site-select"></select>
@@ -246,6 +268,30 @@
         </aside>
       </section>
 
+      <section class="operation-grid">
+        <article class="panel cost-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Uygulama fizibilitesi</p>
+              <h2>Maliyet ve zorluk tahmini</h2>
+            </div>
+            <p class="panel-note">Eğim, erişim, erozyon ve saha baskısına göre uygulama zorluğu özetlenir.</p>
+          </div>
+          <div class="cost-grid" id="cost-grid"></div>
+        </article>
+
+        <article class="panel timeline-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Uygulama planı</p>
+              <h2>Saha takvimi</h2>
+            </div>
+            <p class="panel-note">Hazırlık, dikim, bakım ve izleme adımları uygulanabilir sıraya alınır.</p>
+          </div>
+          <div class="timeline-list" id="timeline-list"></div>
+        </article>
+      </section>
+
       <section class="panel comparison-panel">
         <div class="panel-heading">
           <div>
@@ -255,6 +301,17 @@
           <p class="panel-note">Aday sahalar skor, baskı türü ve uygulama sınıfına göre sıralanır.</p>
         </div>
         <div class="site-table" id="site-table"></div>
+      </section>
+
+      <section class="panel compare-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Karşılaştırmalı analiz</p>
+            <h2>Saha kıyaslama ekranı</h2>
+          </div>
+          <p class="panel-note">En güçlü üç aday skor, tür önerisi ve uygulama zorluğu açısından yan yana okunur.</p>
+        </div>
+        <div class="compare-grid" id="compare-grid"></div>
       </section>
 
       <section class="panel report-panel" id="report-panel">

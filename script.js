@@ -1,4 +1,5 @@
 const inputs = {
+  scenarioSelect: document.querySelector("#scenario-select"),
   siteSelect: document.querySelector("#site-select"),
   speciesGoal: document.querySelector("#species-goal"),
   slope: document.querySelector("#slope"),
@@ -16,9 +17,11 @@ const inputs = {
 const elements = {
   heroScore: document.querySelector("#hero-score"),
   heroSummary: document.querySelector("#hero-summary"),
+  totalSites: document.querySelector("#total-sites"),
   highCount: document.querySelector("#high-count"),
   avgScore: document.querySelector("#avg-score"),
   prioritySpecies: document.querySelector("#priority-species"),
+  riskCount: document.querySelector("#risk-count"),
   executiveGrid: document.querySelector("#executive-grid"),
   resultTitle: document.querySelector("#result-title"),
   scoreValue: document.querySelector("#score-value"),
@@ -28,6 +31,9 @@ const elements = {
   factorList: document.querySelector("#factor-list"),
   speciesList: document.querySelector("#species-list"),
   siteTable: document.querySelector("#site-table"),
+  costGrid: document.querySelector("#cost-grid"),
+  timelineList: document.querySelector("#timeline-list"),
+  compareGrid: document.querySelector("#compare-grid"),
   reportPreview: document.querySelector("#report-preview"),
   downloadReport: document.querySelector("#download-report"),
   printReport: document.querySelector("#print-report")
@@ -148,6 +154,13 @@ let sites = fallbackSites;
 let activeSiteId = fallbackSites[0].id;
 let map;
 let siteLayer;
+let activeLayer = "suitability";
+
+const scenarioConfig = {
+  normal: { label: "Normal yıl", rainfall: 0, score: 0, note: "Uzun dönem ortalamalarına yakın saha koşulları." },
+  dry: { label: "Kurak yıl", rainfall: -90, score: -7, note: "Kuraklık baskısı tür seçimini ve bakım ihtiyacını artırır." },
+  wet: { label: "Yüksek yağış yılı", rainfall: 80, score: 4, note: "Nem avantajı tutunmayı artırır; erozyon kontrolü ayrıca izlenir." }
+};
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -178,12 +191,24 @@ function classify(score) {
   return { label: "Düşük uygunluk", tone: "low", color: "#b86b35" };
 }
 
+function applyScenario(site) {
+  const scenario = scenarioConfig[inputs.scenarioSelect.value] ?? scenarioConfig.normal;
+  return {
+    ...site,
+    rainfall: clamp(Number(site.rainfall) + scenario.rainfall, 150, 1600),
+    scenarioScoreBoost: scenario.score,
+    scenarioLabel: scenario.label,
+    scenarioNote: scenario.note
+  };
+}
+
 function calculateSite(site) {
+  const scenarioSite = applyScenario(site);
   const factors = {
-    Topografya: Math.round((normalizeSlope(site.slope) + Number(site.aspect)) / 2),
-    İklim: Math.round(normalizeRainfall(site.rainfall)),
-    Toprak: Math.round((normalizeSoil(site.soilDepth) + Number(site.erosion)) / 2),
-    Erişim: Math.round(normalizeAccess(site.roadDistance))
+    Topografya: Math.round((normalizeSlope(scenarioSite.slope) + Number(scenarioSite.aspect)) / 2),
+    İklim: Math.round(normalizeRainfall(scenarioSite.rainfall)),
+    Toprak: Math.round((normalizeSoil(scenarioSite.soilDepth) + Number(scenarioSite.erosion)) / 2),
+    Erişim: Math.round(normalizeAccess(scenarioSite.roadDistance))
   };
   const weights = {
     Topografya: Number(inputs.wTopography.value),
@@ -192,8 +217,9 @@ function calculateSite(site) {
     Erişim: Number(inputs.wAccess.value)
   };
   const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
-  const score = Math.round(Object.entries(factors).reduce((sum, [key, value]) => sum + value * weights[key], 0) / totalWeight);
-  return { ...site, factors, weights, score, classInfo: classify(score) };
+  const weightedScore = Math.round(Object.entries(factors).reduce((sum, [key, value]) => sum + value * weights[key], 0) / totalWeight);
+  const score = clamp(weightedScore + scenarioSite.scenarioScoreBoost, 18, 98);
+  return { ...scenarioSite, factors, weights, score, classInfo: classify(score) };
 }
 
 function getActiveInputSite() {
@@ -239,13 +265,16 @@ function syncInputsFromSite(site) {
 
 function renderHero(active, calculatedSites) {
   const highCount = calculatedSites.filter((site) => site.classInfo.tone === "high").length;
+  const riskCount = calculatedSites.filter((site) => site.score < 58 || Number(site.erosion) < 50).length;
   const avg = Math.round(calculatedSites.reduce((sum, site) => sum + site.score, 0) / calculatedSites.length);
   const species = getRecommendedSpecies(active)[0];
   elements.heroScore.textContent = active.score;
-  elements.heroSummary.textContent = `${active.name}, ${active.classInfo.label.toLowerCase()} sınıfında değerlendiriliyor. Ana baskı: ${active.pressure}.`;
+  elements.heroSummary.textContent = `${active.name}, ${active.classInfo.label.toLowerCase()} sınıfında değerlendiriliyor. ${active.scenarioLabel} senaryosu aktif. Ana baskı: ${active.pressure}.`;
+  elements.totalSites.textContent = calculatedSites.length;
   elements.highCount.textContent = highCount;
   elements.avgScore.textContent = avg;
   elements.prioritySpecies.textContent = species?.name ?? "-";
+  elements.riskCount.textContent = riskCount;
 }
 
 function renderExecutive(active, calculatedSites) {
@@ -264,7 +293,7 @@ function renderScore(active) {
   elements.resultTitle.textContent = active.name;
   elements.scoreValue.textContent = active.score;
   elements.classValue.textContent = active.classInfo.label;
-  elements.scoreRing.style.background = `conic-gradient(${active.classInfo.color} ${degrees}deg, #dce8d5 0deg)`;
+  elements.scoreRing.style.background = `conic-gradient(${active.classInfo.color} ${degrees}deg, #d7e0ec 0deg)`;
   elements.recommendation.textContent =
     active.classInfo.tone === "high"
       ? "Saha öncelikli ağaçlandırma programına alınabilir. Toprak hazırlığı, fidan tür karışımı ve bakım planı birlikte hazırlanmalıdır."
@@ -274,6 +303,42 @@ function renderScore(active) {
   elements.factorList.innerHTML = Object.entries(active.factors)
     .map(([name, value]) => `<article class="factor"><span>${name}</span><div class="bar"><span style="width:${value}%"></span></div><strong>${value}</strong></article>`)
     .join("");
+}
+
+function getFeasibility(active) {
+  const terrainDifficulty = clamp(Math.round(active.slope * 1.4 + (100 - normalizeAccess(active.roadDistance)) * 0.45), 12, 100);
+  const maintenanceNeed = clamp(Math.round((100 - active.factors.İklim) * 0.48 + (100 - active.factors.Toprak) * 0.42 + (100 - Number(active.erosion)) * 0.3), 10, 100);
+  const costIndex = clamp(Math.round(terrainDifficulty * 0.42 + maintenanceNeed * 0.36 + active.roadDistance * 2.2), 10, 100);
+  const riskLabel = costIndex >= 70 ? "Yüksek zorluk" : costIndex >= 45 ? "Orta zorluk" : "Düşük zorluk";
+  return { terrainDifficulty, maintenanceNeed, costIndex, riskLabel };
+}
+
+function renderCost(active) {
+  const feasibility = getFeasibility(active);
+  elements.costGrid.innerHTML = `
+    <article class="cost-card"><span class="table-head">Uygulama endeksi</span><strong>${feasibility.costIndex}/100</strong><p>${feasibility.riskLabel}</p></article>
+    <article class="cost-card"><span class="table-head">Arazi zorluğu</span><strong>${feasibility.terrainDifficulty}/100</strong><p>Eğim ve yol erişimi birlikte hesaplandı.</p></article>
+    <article class="cost-card"><span class="table-head">Bakım ihtiyacı</span><strong>${feasibility.maintenanceNeed}/100</strong><p>İklim, toprak ve erozyon baskısına göre üretildi.</p></article>
+    <article class="cost-card"><span class="table-head">Öncelik kararı</span><strong>${active.score >= 76 ? "Programla" : active.score >= 58 ? "İyileştir" : "Beklet"}</strong><p>${active.scenarioNote}</p></article>
+  `;
+}
+
+function renderTimeline(active) {
+  const feasibility = getFeasibility(active);
+  const careYear = feasibility.maintenanceNeed >= 65 ? "3 yıl yoğun bakım" : "2 yıl standart bakım";
+  const erosionStep = Number(active.erosion) < 50 ? "Erozyon kırıcı teras ve yüzey örtüsü öncelikli." : "Standart toprak hazırlığı yeterli.";
+  const steps = [
+    ["Ön etüt", "Saha sınırı, eğim ve mevcut örtü kontrol edilir."],
+    ["Toprak hazırlığı", erosionStep],
+    ["Dikim penceresi", `${active.scenarioLabel} koşullarına göre tür karışımı ve dikim yoğunluğu netleştirilir.`],
+    ["Bakım ve izleme", `${careYear}; tutma başarısı ve erozyon etkisi periyodik takip edilir.`]
+  ];
+  elements.timelineList.innerHTML = steps.map(([title, text], index) => `
+    <article class="timeline-item">
+      <span>${index + 1}</span>
+      <div><strong>${title}</strong><p>${text}</p></div>
+    </article>
+  `).join("");
 }
 
 function renderSpecies(active) {
@@ -300,6 +365,25 @@ function renderTable(calculatedSites) {
       </article>
     `)
     .join("");
+}
+
+function renderCompare(calculatedSites) {
+  elements.compareGrid.innerHTML = calculatedSites.slice(0, 3).map((site) => {
+    const species = getRecommendedSpecies(site)[0];
+    const feasibility = getFeasibility(site);
+    return `
+      <article class="compare-card">
+        <span class="eyebrow">${site.district}</span>
+        <strong>${site.name}</strong>
+        <div class="compare-metrics">
+          <p><span>Skor</span>${site.score}/100</p>
+          <p><span>Sınıf</span>${site.classInfo.label}</p>
+          <p><span>Zorluk</span>${feasibility.costIndex}/100</p>
+          <p><span>Tür</span>${species?.name ?? "-"}</p>
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderReport(active) {
@@ -336,6 +420,11 @@ function getReportText() {
     "Önerilen türler:",
     ...species.map((item, index) => `${index + 1}. ${item.name} - uyum ${Math.round(item.fit)}/100 - ${item.note}`),
     "",
+    "Fizibilite:",
+    `Uygulama zorluğu: ${getFeasibility(active).costIndex}/100`,
+    `Bakım ihtiyacı: ${getFeasibility(active).maintenanceNeed}/100`,
+    `Senaryo: ${active.scenarioLabel}`,
+    "",
     "Uygulama notu:",
     active.classInfo.tone === "high"
       ? "Saha öncelikli uygulama havuzuna alınabilir."
@@ -369,9 +458,9 @@ function renderMap(calculatedSites) {
     },
     {
       style: (feature) => ({
-        color: feature.properties.classInfo.color,
+        color: getLayerColor(feature.properties),
         weight: feature.properties.id === activeSiteId ? 4 : 2,
-        fillColor: feature.properties.classInfo.color,
+        fillColor: getLayerColor(feature.properties),
         fillOpacity: feature.properties.id === activeSiteId ? 0.46 : 0.28
       }),
       onEachFeature: (feature, layer) => {
@@ -385,6 +474,25 @@ function renderMap(calculatedSites) {
       }
     }
   ).addTo(map);
+}
+
+function getLayerColor(site) {
+  if (activeLayer === "erosion") {
+    if (Number(site.erosion) < 50) return "#b86b35";
+    if (Number(site.erosion) < 75) return "#64748b";
+    return "#2f80ed";
+  }
+  if (activeLayer === "rainfall") {
+    if (site.rainfall < 420) return "#b86b35";
+    if (site.rainfall < 650) return "#64748b";
+    return "#2f80ed";
+  }
+  if (activeLayer === "access") {
+    if (site.roadDistance > 7) return "#b86b35";
+    if (site.roadDistance > 4) return "#64748b";
+    return "#2f80ed";
+  }
+  return site.classInfo.color;
 }
 
 function createMap() {
@@ -401,8 +509,11 @@ function renderAll() {
   renderHero(active, calculatedSites);
   renderExecutive(active, calculatedSites);
   renderScore(active);
+  renderCost(active);
+  renderTimeline(active);
   renderSpecies(active);
   renderTable(calculatedSites);
+  renderCompare(calculatedSites);
   renderReport(active);
   renderMap(calculatedSites);
 }
@@ -425,6 +536,14 @@ Object.values(inputs).forEach((input) => {
 
 elements.downloadReport?.addEventListener("click", downloadReport);
 elements.printReport?.addEventListener("click", () => window.print());
+
+document.querySelectorAll("[data-layer]").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeLayer = button.dataset.layer;
+    document.querySelectorAll("[data-layer]").forEach((item) => item.classList.toggle("is-active", item === button));
+    renderAll();
+  });
+});
 
 async function init() {
   try {
