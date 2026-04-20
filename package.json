@@ -1,0 +1,8 @@
+{
+  "name": "agaclandirma-uygunluk-analiz-sistemi",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "node scripts/lint.mjs"
+  }
+}

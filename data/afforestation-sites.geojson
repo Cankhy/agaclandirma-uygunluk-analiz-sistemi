@@ -1,0 +1,131 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "ankara-kizilcahamam",
+        "name": "Kızılcahamam Rehabilitasyon Sahası",
+        "district": "Ankara / Kızılcahamam",
+        "macroRegion": "İç Anadolu geçişi",
+        "slope": 18,
+        "aspect": 92,
+        "rainfall": 520,
+        "soilDepth": 68,
+        "erosion": 66,
+        "roadDistance": 4.2,
+        "vegetation": "Bozuk orman ve açıklık mozaiği",
+        "pressure": "Orta erozyon baskısı"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[32.35, 40.33], [32.58, 40.36], [32.64, 40.18], [32.42, 40.1], [32.35, 40.33]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "konya-karapinar",
+        "name": "Karapınar Rüzgâr Erozyonu Kuşağı",
+        "district": "Konya / Karapınar",
+        "macroRegion": "Kurak iç havza",
+        "slope": 6,
+        "aspect": 76,
+        "rainfall": 330,
+        "soilDepth": 42,
+        "erosion": 34,
+        "roadDistance": 2.6,
+        "vegetation": "Seyrek step ve açık alan",
+        "pressure": "Yüksek rüzgâr erozyonu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[33.18, 37.86], [33.52, 37.9], [33.58, 37.63], [33.26, 37.56], [33.18, 37.86]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mugla-mentese",
+        "name": "Menteşe Kızılçam Tamamlama Sahası",
+        "district": "Muğla / Menteşe",
+        "macroRegion": "Akdeniz kıyı ardı",
+        "slope": 24,
+        "aspect": 58,
+        "rainfall": 760,
+        "soilDepth": 82,
+        "erosion": 66,
+        "roadDistance": 5.8,
+        "vegetation": "Kızılçam, maki ve bozuk orman",
+        "pressure": "Yangın sonrası tamamlama ihtiyacı"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[28.18, 37.18], [28.5, 37.2], [28.58, 36.98], [28.26, 36.9], [28.18, 37.18]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "erzurum-oltu",
+        "name": "Oltu Havza Koruma Sahası",
+        "district": "Erzurum / Oltu",
+        "macroRegion": "Doğu Anadolu",
+        "slope": 31,
+        "aspect": 92,
+        "rainfall": 460,
+        "soilDepth": 58,
+        "erosion": 66,
+        "roadDistance": 8.5,
+        "vegetation": "Ardıç ve sarıçam geçiş dokusu",
+        "pressure": "Yamaç stabilitesi ve kar yükü"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[41.72, 40.72], [42.05, 40.78], [42.14, 40.54], [41.82, 40.46], [41.72, 40.72]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "balikesir-edremit",
+        "name": "Edremit Maki Dönüşüm Sahası",
+        "district": "Balıkesir / Edremit",
+        "macroRegion": "Kuzey Ege",
+        "slope": 21,
+        "aspect": 76,
+        "rainfall": 690,
+        "soilDepth": 74,
+        "erosion": 90,
+        "roadDistance": 3.1,
+        "vegetation": "Maki ve bozuk kızılçam",
+        "pressure": "Turizm ve yerleşim baskısı"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[26.82, 39.72], [27.12, 39.76], [27.18, 39.52], [26.9, 39.46], [26.82, 39.72]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mersin-mut",
+        "name": "Mut Mikro Havza Ağaçlandırma Sahası",
+        "district": "Mersin / Mut",
+        "macroRegion": "Toros geçişi",
+        "slope": 28,
+        "aspect": 42,
+        "rainfall": 540,
+        "soilDepth": 61,
+        "erosion": 34,
+        "roadDistance": 6.4,
+        "vegetation": "Kuru çalılık ve açıklık alan",
+        "pressure": "Yüksek yaz kuraklığı"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[33.2, 36.82], [33.54, 36.88], [33.62, 36.62], [33.28, 36.54], [33.2, 36.82]]]
+      }
+    }
+  ]
+}
