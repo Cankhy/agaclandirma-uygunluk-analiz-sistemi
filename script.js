@@ -516,13 +516,14 @@ function renderScenarioComparison(active) {
     const delta = result.score - normalScore;
     const deltaLabel = delta === 0 ? "Referans" : `${delta > 0 ? "+" : ""}${delta} puan`;
     return `
-      <article class="scenario-card ${key === inputs.scenarioSelect.value ? "is-active" : ""}">
+      <button class="scenario-card ${key === inputs.scenarioSelect.value ? "is-active" : ""}" type="button" data-scenario-card="${key}">
         <span class="eyebrow">${scenario.label}</span>
         <strong>${result.score}/100</strong>
         <p>${result.classInfo.label} · yağış ${result.rainfall} mm</p>
         <p>${scenario.note}</p>
         <span class="scenario-delta">${deltaLabel}</span>
-      </article>
+        <span class="card-action">Bu senaryoyu uygula</span>
+      </button>
     `;
   }).join("");
 }
@@ -532,28 +533,32 @@ function renderQualityPanel(active) {
   const quality = getQualityAssessment(active);
   const feasibility = getFeasibility(active);
   elements.qualityGrid.innerHTML = `
-    <article class="quality-card">
+    <button class="quality-card" type="button" data-scroll-target="data-panel">
       <span class="eyebrow">Kaynak güveni</span>
       <strong>${quality.sourceScore}/100</strong>
       <div class="quality-meter"><span style="width:${quality.sourceScore}%"></span></div>
       <p>${quality.auditNote}</p>
-    </article>
-    <article class="quality-card">
+      <span class="card-action">Veri kaynaklarına git</span>
+    </button>
+    <button class="quality-card" type="button" data-scroll-target="report-panel">
       <span class="eyebrow">Tutma başarısı</span>
       <strong>${quality.survivalScore}/100</strong>
       <div class="quality-meter"><span style="width:${quality.survivalScore}%"></span></div>
       <p>Skor ve bakım ihtiyacına göre ilk üç yıl başarı beklentisi.</p>
-    </article>
-    <article class="quality-card">
+      <span class="card-action">Raporda incele</span>
+    </button>
+    <button class="quality-card" type="button" data-scroll-target="analysis-panel">
       <span class="eyebrow">Bakım sınıfı</span>
       <strong>${quality.maintenanceClass}</strong>
       <p>Bakım ihtiyacı ${feasibility.maintenanceNeed}/100. Sulama, tamamlama ve ot alma programı buna göre planlanır.</p>
-    </article>
-    <article class="quality-card">
+      <span class="card-action">Model girdilerini değiştir</span>
+    </button>
+    <button class="quality-card" type="button" data-scroll-target="map-panel">
       <span class="eyebrow">Saha riski</span>
       <strong>${quality.fieldRisk}</strong>
       <p>Erozyon, erişim, toprak derinliği ve iklim duyarlılığı birlikte değerlendirilir.</p>
-    </article>
+      <span class="card-action">Haritada gör</span>
+    </button>
   `;
 }
 
@@ -838,6 +843,21 @@ document.querySelectorAll("[data-layer]").forEach((button) => {
     document.querySelectorAll("[data-layer]").forEach((item) => item.classList.toggle("is-active", item === button));
     renderAll();
   });
+});
+
+document.addEventListener("click", (event) => {
+  const scenarioCard = event.target.closest("[data-scenario-card]");
+  if (scenarioCard) {
+    inputs.scenarioSelect.value = scenarioCard.dataset.scenarioCard;
+    renderAll();
+    document.getElementById("analysis-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  const scrollCard = event.target.closest("[data-scroll-target]");
+  if (scrollCard) {
+    document.getElementById(scrollCard.dataset.scrollTarget)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 async function init() {
