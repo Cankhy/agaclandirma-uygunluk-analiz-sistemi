@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Ağaçlandırma Uygunluk Analiz Sistemi önizleme">
+  <defs>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0f172a"/>
+      <stop offset="0.58" stop-color="#24324f"/>
+      <stop offset="1" stop-color="#b86b35"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2f80ed"/>
+      <stop offset="1" stop-color="#5b9df5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="#f3f5f8"/>
+  <rect width="1280" height="64" fill="#111827"/>
+  <text x="72" y="40" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="700">Abidin CAN · GIS Portföy Prototipi</text>
+  <rect y="64" width="1280" height="92" fill="#ffffff"/>
+  <rect x="72" y="86" width="54" height="54" rx="16" fill="url(#blue)"/>
+  <text x="91" y="121" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="700">AU</text>
+  <text x="144" y="120" fill="#172033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Ağaçlandırma Uygunluk</text>
+  <rect y="156" width="1280" height="300" fill="url(#hero)"/>
+  <text x="72" y="244" fill="#d0d5dd" font-family="Arial, sans-serif" font-size="18" font-weight="700">ARAZİ PLANLAMA VE KARAR DESTEK SİSTEMİ</text>
+  <text x="72" y="315" fill="#ffffff" font-family="Georgia, serif" font-size="72" font-weight="700">Ağaçlandırma</text>
+  <text x="72" y="390" fill="#ffffff" font-family="Georgia, serif" font-size="72" font-weight="700">Uygunluk Analizi</text>
+  <rect x="72" y="492" width="260" height="132" rx="24" fill="#ffffff"/>
+  <text x="102" y="550" fill="#172033" font-family="Georgia, serif" font-size="42" font-weight="700">78</text>
+  <text x="102" y="586" fill="#667085" font-family="Arial, sans-serif" font-size="18" font-weight="700">Seçili saha skoru</text>
+  <rect x="360" y="492" width="260" height="132" rx="24" fill="#ffffff"/>
+  <text x="390" y="550" fill="#172033" font-family="Georgia, serif" font-size="42" font-weight="700">10</text>
+  <text x="390" y="586" fill="#667085" font-family="Arial, sans-serif" font-size="18" font-weight="700">Aday saha</text>
+  <rect x="648" y="492" width="560" height="132" rx="24" fill="#ffffff"/>
+  <text x="678" y="548" fill="#172033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Harita + canlı veri + tür önerisi + rapor</text>
+  <text x="678" y="586" fill="#667085" font-family="Arial, sans-serif" font-size="18">Open-Meteo, SoilGrids ve OGM açık veri referanslarıyla güçlendirilmiş prototip.</text>
+</svg>

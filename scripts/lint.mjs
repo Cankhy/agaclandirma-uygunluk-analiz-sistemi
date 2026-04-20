@@ -8,6 +8,7 @@ const files = {
   css: path.join(root, "style.css"),
   js: path.join(root, "script.js"),
   geojson: path.join(root, "data", "afforestation-sites.geojson"),
+  ogm: path.join(root, "data", "ogm-public-forest-assets.json"),
   readme: path.join(root, "README.md"),
   manifest: path.join(root, "site.webmanifest"),
   favicon: path.join(root, "assets", "favicon.svg"),
@@ -41,6 +42,7 @@ const js = read(files.js);
 const readme = read(files.readme);
 const manifest = JSON.parse(read(files.manifest));
 let geojson;
+let ogm;
 
 try {
   geojson = JSON.parse(read(files.geojson));
@@ -48,10 +50,16 @@ try {
   fail(`GeoJSON parse error: ${error.message}`);
 }
 
-if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && html.includes('id="report-preview"') && html.includes('id="live-data-grid"')) {
-  ok("HTML includes map, species recommendation, live data, and report modules");
+try {
+  ogm = JSON.parse(read(files.ogm));
+} catch (error) {
+  fail(`OGM data parse error: ${error.message}`);
+}
+
+if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && html.includes('id="report-preview"') && html.includes('id="live-data-grid"') && html.includes('id="ogm-grid"')) {
+  ok("HTML includes map, species recommendation, live data, OGM data, and report modules");
 } else {
-  fail("HTML must include map, species recommendation, live data, and report modules");
+  fail("HTML must include map, species recommendation, live data, OGM data, and report modules");
 }
 
 if (html.includes("<link rel=\"canonical\"") && html.includes("<link rel=\"icon\"") && html.includes("<link rel=\"manifest\"")) {
@@ -85,10 +93,16 @@ if (geojson?.type === "FeatureCollection" && Array.isArray(geojson.features) && 
   fail("GeoJSON must include at least 6 candidate sites");
 }
 
-if (js.includes('fetch("data/afforestation-sites.geojson")') && js.includes("speciesCatalog") && js.includes("calculateSite") && js.includes("https://api.open-meteo.com/v1/forecast") && js.includes("https://rest.isric.org/soilgrids/v2.0/properties/query")) {
-  ok("JavaScript loads local, weather, soil, and suitability data");
+if (Array.isArray(ogm?.records) && ogm.records.length >= 6 && ogm.records.every((record) => record.sourceUrl?.includes("ogm.gov.tr"))) {
+  ok("OGM public forest asset references are valid");
 } else {
-  fail("JavaScript must load GeoJSON, live weather, soil data, and include suitability logic");
+  fail("OGM public forest asset data must include sourced records");
+}
+
+if (js.includes('fetch("data/afforestation-sites.geojson")') && js.includes("data/ogm-public-forest-assets.json") && js.includes("speciesCatalog") && js.includes("calculateSite") && js.includes("https://api.open-meteo.com/v1/forecast") && js.includes("https://rest.isric.org/soilgrids/v2.0/properties/query") && js.includes("jsPDF")) {
+  ok("JavaScript loads local, OGM, weather, soil, PDF, and suitability data");
+} else {
+  fail("JavaScript must load GeoJSON, OGM references, live weather, soil data, PDF logic, and include suitability logic");
 }
 
 if (readme.includes("Ağaçlandırma Uygunluk Analiz Sistemi") && readme.includes("npm run lint")) {

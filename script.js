@@ -23,6 +23,7 @@ const elements = {
   prioritySpecies: document.querySelector("#priority-species"),
   riskCount: document.querySelector("#risk-count"),
   liveDataGrid: document.querySelector("#live-data-grid"),
+  ogmGrid: document.querySelector("#ogm-grid"),
   executiveGrid: document.querySelector("#executive-grid"),
   resultTitle: document.querySelector("#result-title"),
   scoreValue: document.querySelector("#score-value"),
@@ -37,6 +38,7 @@ const elements = {
   compareGrid: document.querySelector("#compare-grid"),
   reportPreview: document.querySelector("#report-preview"),
   downloadReport: document.querySelector("#download-report"),
+  downloadPdf: document.querySelector("#download-pdf"),
   printReport: document.querySelector("#print-report")
 };
 
@@ -159,6 +161,7 @@ let activeLayer = "suitability";
 let liveWeatherBySite = {};
 let soilDataBySite = {};
 let liveDataState = { weather: "loading", soil: "waiting", updatedAt: null };
+let ogmForestAssets = [];
 
 const scenarioConfig = {
   normal: { label: "Normal yıl", rainfall: 0, score: 0, note: "Uzun dönem ortalamalarına yakın saha koşulları." },
@@ -213,6 +216,18 @@ function getSiteCentroid(site) {
     lon: totals.lon / Math.max(ring.length, 1),
     lat: totals.lat / Math.max(ring.length, 1)
   };
+}
+
+async function cachedJson(url, cacheKey, ttlMinutes = 60) {
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    if (Date.now() - parsed.timestamp < ttlMinutes * 60 * 1000) return parsed.value;
+  }
+  const response = await fetch(url);
+  const value = await response.json();
+  localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), value }));
+  return value;
 }
 
 function getWeatherAdjustment(site) {
@@ -310,6 +325,26 @@ function renderLiveData(active) {
     <article class="live-data-card"><span class="table-head">Toprak tahmini</span><strong>${soil ? `pH ${soil.ph}` : "Bekleniyor"}</strong><p>${soil ? `Kil ${soil.clay} g/kg · kum ${soil.sand} g/kg · organik karbon ${soil.soc} dg/kg` : "Aktif saha için SoilGrids sorgusu hazırlanıyor."}</p></article>
     <article class="live-data-card"><span class="table-head">Güncelleme</span><strong>${updatedAt}</strong><p>Canlı değerler erişilemezse yerel GeoJSON modeli güvenli yedek olarak kullanılır.</p></article>
   `;
+}
+
+function renderOgmAssets() {
+  if (!elements.ogmGrid) return;
+  if (!ogmForestAssets.length) {
+    elements.ogmGrid.innerHTML = "<p>OGM açık veri referansı yükleniyor.</p>";
+    return;
+  }
+  elements.ogmGrid.innerHTML = ogmForestAssets.map((record) => {
+    const degradedRatio = Math.round((record.degradedClosedHa / record.totalHa) * 100);
+    return `
+      <article class="ogm-card">
+        <span class="table-head">${record.region}</span>
+        <strong>${record.totalHa.toLocaleString("tr-TR")} ha</strong>
+        <p>Normal kapalı: ${record.normalClosedHa.toLocaleString("tr-TR")} ha · Boşluklu kapalı: ${record.degradedClosedHa.toLocaleString("tr-TR")} ha</p>
+        <p>Rehabilitasyon önceliği için boşluklu kapalı oranı: %${degradedRatio}</p>
+        <a href="${record.sourceUrl}" target="_blank" rel="noreferrer">OGM kaynağı</a>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderExecutive(active, calculatedSites) {
@@ -487,6 +522,26 @@ function downloadReport() {
   URL.revokeObjectURL(url);
 }
 
+function downloadPdfReport() {
+  const JsPdf = window.jspdf?.jsPDF;
+  if (!JsPdf) {
+    window.print();
+    return;
+  }
+  const active = calculateSite(getActiveInputSite());
+  const doc = new JsPdf({ unit: "pt", format: "a4" });
+  const lines = doc.splitTextToSize(getReportText(), 500);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Agaclandirma Uygunluk Analiz Raporu", 48, 52);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Saha: ${active.name}`, 48, 76);
+  doc.text(`Skor: ${active.score}/100`, 48, 92);
+  doc.text(lines, 48, 122);
+  doc.save("agaclandirma-uygunluk-raporu.pdf");
+}
+
 function renderMap(calculatedSites) {
   if (!map || !window.L) return;
   if (siteLayer) siteLayer.remove();
@@ -551,6 +606,7 @@ function renderAll() {
   const calculatedSites = getCalculatedSites();
   renderHero(active, calculatedSites);
   renderLiveData(active);
+  renderOgmAssets();
   renderExecutive(active, calculatedSites);
   renderScore(active);
   renderCost(active);
@@ -571,8 +627,7 @@ async function loadLiveWeather() {
       current: "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
       timezone: "Europe/Istanbul"
     });
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
-    const payload = await response.json();
+    const payload = await cachedJson(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, "au-weather-cache", 30);
     const rows = Array.isArray(payload) ? payload : [payload];
     liveWeatherBySite = Object.fromEntries(rows.map((row, index) => [
       sites[index].id,
@@ -609,8 +664,7 @@ async function loadSoilDataForActiveSite() {
       depth: "0-5cm",
       value: "mean"
     });
-    const response = await fetch(`https://rest.isric.org/soilgrids/v2.0/properties/query?${params.toString()}`);
-    const payload = await response.json();
+    const payload = await cachedJson(`https://rest.isric.org/soilgrids/v2.0/properties/query?${params.toString()}`, `au-soil-cache-${active.id}`, 1440);
     soilDataBySite[active.id] = {
       ph: ((extractSoilValue(payload, "phh2o") ?? 700) / 100).toFixed(1),
       clay: extractSoilValue(payload, "clay") ?? "-",
@@ -621,6 +675,15 @@ async function loadSoilDataForActiveSite() {
   } catch (error) {
     console.warn("SoilGrids verisi alınamadı:", error);
     liveDataState.soil = "error";
+  }
+}
+
+async function loadOgmForestAssets() {
+  try {
+    const payload = await cachedJson("data/ogm-public-forest-assets.json", "au-ogm-assets-cache", 1440);
+    ogmForestAssets = payload.records ?? [];
+  } catch (error) {
+    console.warn("OGM açık veri referansı yüklenemedi:", error);
   }
 }
 
@@ -642,6 +705,7 @@ Object.values(inputs).forEach((input) => {
 });
 
 elements.downloadReport?.addEventListener("click", downloadReport);
+elements.downloadPdf?.addEventListener("click", downloadPdfReport);
 elements.printReport?.addEventListener("click", () => window.print());
 
 document.querySelectorAll("[data-layer]").forEach((button) => {
@@ -663,6 +727,7 @@ async function init() {
   populateSiteSelect();
   syncInputsFromSite(sites[0]);
   createMap();
+  await loadOgmForestAssets();
   renderAll();
   await loadLiveWeather();
   await loadSoilDataForActiveSite();

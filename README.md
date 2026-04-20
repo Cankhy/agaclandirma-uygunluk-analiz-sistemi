@@ -4,6 +4,8 @@
 
 Canlı demo: [cankhy.github.io/agaclandirma-uygunluk-analiz-sistemi](https://cankhy.github.io/agaclandirma-uygunluk-analiz-sistemi/)
 
+![Proje önizleme](assets/portfolio-preview.svg)
+
 Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi kriterlerinden uygunluk skoru, tür önerisi, uygulama zorluğu, saha takvimi ve rapor çıktısı üreten profesyonel bir portföy ürünüdür.
 
 ## Öne Çıkan Modüller
@@ -11,6 +13,7 @@ Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi 
 - Harita merkezli aday saha analizi
 - Open-Meteo ile canlı hava göstergeleri
 - ISRIC SoilGrids ile aktif saha toprak tahmini
+- OGM açık orman varlığı referans veri paneli
 - Uygunluk, erozyon, yağış ve erişim katmanları
 - Normal yıl, kurak yıl ve yüksek yağış yılı senaryoları
 - Eğim, bakı, yağış, toprak derinliği, erozyon ve erişim kriterleri
@@ -20,6 +23,8 @@ Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi 
 - Hazırlık, dikim, bakım ve izleme takvimi
 - Saha öncelik matrisi ve karşılaştırmalı analiz
 - Rapor metni indirme ve yazdırılabilir görünüm
+- jsPDF ile PDF rapor oluşturma
+- Tarayıcı önbelleği ile canlı servis çağrılarını azaltma
 - SEO, manifest, sitemap, robots ve GitHub Pages yayını
 
 ## Kullanılan Teknolojiler
@@ -48,6 +53,7 @@ npm run lint
 ## Veri Katmanı
 
 - `data/afforestation-sites.geojson`: Aday ağaçlandırma sahaları ve saha kriterleri
+- `data/ogm-public-forest-assets.json`: Resmî OGM orman varlığı sayfalarından derlenen açık referans kayıtları
 
 Veri setinde farklı iklim, topoğrafya, erozyon ve erişim karakterlerine sahip örnek sahalar bulunur. Sahalar prototip amacıyla modellenmiştir.
 
@@ -57,6 +63,7 @@ Veri setinde farklı iklim, topoğrafya, erozyon ve erişim karakterlerine sahip
 - ISRIC SoilGrids v2.0: aktif saha için pH, kil, kum ve organik karbon tahminleri
 - Copernicus DEM: eğim/topografya analizi için referans sayısal yükseklik modeli
 - CORINE Land Cover: arazi örtüsü ve kullanım sınıfları için referans katman
+- OGM Orman Varlığı sayfaları: bölge müdürlüğü düzeyinde normal kapalı, boşluklu kapalı ve toplam orman varlığı referansları
 
 Canlı servisler yanıt vermezse uygulama yerel GeoJSON verisiyle çalışmaya devam eder. Böylece demo yayında bozulmaz.
 

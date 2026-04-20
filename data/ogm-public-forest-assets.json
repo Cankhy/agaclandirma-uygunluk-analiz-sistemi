@@ -1,0 +1,48 @@
+{
+  "sourceNote": "OGM bölge müdürlüğü web sayfalarında yayımlanan açık orman varlığı tablolarından derlenmiş portföy referans veri setidir.",
+  "updatedAt": "2026-04-20",
+  "records": [
+    {
+      "region": "İzmir Orman Bölge Müdürlüğü",
+      "normalClosedHa": 560800,
+      "degradedClosedHa": 461276,
+      "totalHa": 1022076,
+      "sourceUrl": "https://www.ogm.gov.tr/izmirobm/ormanlarimiz/orman-varligi"
+    },
+    {
+      "region": "Mersin Orman Bölge Müdürlüğü",
+      "normalClosedHa": 468129,
+      "degradedClosedHa": 367405,
+      "totalHa": 835534,
+      "sourceUrl": "https://www.ogm.gov.tr/mersinobm/ormanlarimiz/orman-varligi"
+    },
+    {
+      "region": "Adana Orman Bölge Müdürlüğü",
+      "normalClosedHa": 752342,
+      "degradedClosedHa": 996336,
+      "totalHa": 1748678,
+      "sourceUrl": "https://www.ogm.gov.tr/adanaobm/ormanlarimiz/orman-varligi"
+    },
+    {
+      "region": "Balıkesir Orman Bölge Müdürlüğü",
+      "normalClosedHa": 435162,
+      "degradedClosedHa": 197243,
+      "totalHa": 632405,
+      "sourceUrl": "https://www.ogm.gov.tr/balikesirobm/ormanlarimiz/orman-varligi"
+    },
+    {
+      "region": "Amasya Orman Bölge Müdürlüğü",
+      "normalClosedHa": 930708,
+      "degradedClosedHa": 632690,
+      "totalHa": 1563398,
+      "sourceUrl": "https://www.ogm.gov.tr/amasyaobm/ormanlarimiz/orman-varligi"
+    },
+    {
+      "region": "Çanakkale Orman Bölge Müdürlüğü",
+      "normalClosedHa": 414023,
+      "degradedClosedHa": 168643,
+      "totalHa": 582666,
+      "sourceUrl": "https://www.ogm.gov.tr/canakkaleobm/ormanlarimiz/orman-varligi"
+    }
+  ]
+}

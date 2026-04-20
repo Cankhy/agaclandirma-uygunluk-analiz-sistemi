@@ -511,7 +511,8 @@ h2 {
 .compare-grid,
 .compare-metrics,
 .live-data-grid,
-.source-list {
+.source-list,
+.ogm-grid {
   display: grid;
   gap: 14px;
 }
@@ -549,6 +550,38 @@ h2 {
 
 .source-list span {
   font-weight: 900;
+}
+
+.ogm-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.ogm-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+}
+
+.ogm-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.22rem;
+}
+
+.ogm-card p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.ogm-card a {
+  display: inline-flex;
+  margin-top: 12px;
+  color: var(--leaf);
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .operation-grid {
@@ -895,6 +928,7 @@ a:focus-visible {
   .compare-grid,
   .live-data-grid,
   .source-list,
+  .ogm-grid,
   .report-grid,
   .assurance-panel {
     grid-template-columns: 1fr;
