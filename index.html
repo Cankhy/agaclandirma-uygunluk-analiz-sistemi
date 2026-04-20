@@ -6,7 +6,7 @@
     <title>Ağaçlandırma Uygunluk Analiz Sistemi</title>
     <meta name="description" content="Arazi kriterlerini, aday saha haritasını ve tür öneri motorunu birleştiren profesyonel GIS karar destek prototipi." />
     <meta name="author" content="Abidin CAN" />
-    <meta name="theme-color" content="#253629" />
+    <meta name="theme-color" content="#223426" />
     <meta property="og:title" content="Ağaçlandırma Uygunluk Analiz Sistemi" />
     <meta property="og:description" content="Çok kriterli arazi uygunluğu, tür önerisi ve saha önceliklendirme odaklı GIS portföy projesi." />
     <meta property="og:type" content="website" />
@@ -21,221 +21,235 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <a class="skip-link" href="#analysis-panel">Ana içeriğe geç</a>
+    <a class="skip-link" href="#map-panel">Ana içeriğe geç</a>
 
-    <div class="app-shell">
-      <aside class="side-rail" aria-label="Proje menüsü">
-        <div class="brand-block">
+    <header class="site-header">
+      <div class="utility-bar">
+        <span>Abidin CAN · GIS Portföy Prototipi</span>
+        <span>Çok Kriterli Arazi Uygunluğu</span>
+      </div>
+
+      <nav class="main-nav" aria-label="Ana menü">
+        <a class="brand" href="#top">
           <span class="brand-mark">AU</span>
-          <div>
-            <p class="eyebrow">GIS karar destek</p>
-            <strong>Ağaçlandırma Uygunluk</strong>
-          </div>
-        </div>
-
-        <nav class="rail-nav">
+          <span>Ağaçlandırma Uygunluk</span>
+        </a>
+        <div class="nav-links">
           <a href="#map-panel">Saha Haritası</a>
-          <a href="#analysis-panel">Kriter Modeli</a>
+          <a href="#analysis-panel">Analiz Modeli</a>
           <a href="#species-panel">Tür Önerisi</a>
-          <a href="#report-panel">Uygulama Raporu</a>
-        </nav>
-
-        <div class="rail-card">
-          <span>Portföy prototipi</span>
-          <p>Abidin CAN tarafından geliştirilen bağımsız arazi analiz ürünü.</p>
+          <a href="#report-panel">Rapor</a>
         </div>
-      </aside>
+      </nav>
 
-      <main class="workbench">
-        <header class="command-header">
+      <section class="hero" id="top">
+        <div class="hero-overlay">
+          <p class="eyebrow">Arazi planlama ve karar destek sistemi</p>
+          <h1>Ağaçlandırma Uygunluk Analiz Sistemi</h1>
+          <p class="hero-copy">
+            Aday sahaları; topografya, iklim, toprak, erozyon ve erişim kriterlerine göre
+            puanlayan, uygun tür seçimi ve uygulama önceliği üreten profesyonel GIS prototipi.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#map-panel">Haritayı İncele</a>
+            <a class="secondary-action" href="#analysis-panel">Modeli Test Et</a>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <main class="page-content">
+      <section class="metric-strip" aria-label="Genel özet">
+        <article>
+          <span id="hero-score">--</span>
+          <p>Seçili saha skoru</p>
+        </article>
+        <article>
+          <span id="high-count">0</span>
+          <p>Yüksek uygunluk</p>
+        </article>
+        <article>
+          <span id="avg-score">0</span>
+          <p>Ortalama skor</p>
+        </article>
+        <article>
+          <span id="priority-species">-</span>
+          <p>Önerilen tür</p>
+        </article>
+      </section>
+
+      <section class="intro-panel">
+        <div>
+          <p class="eyebrow">Proje yaklaşımı</p>
+          <h2>Harita, arazi kriterleri ve tür seçimini aynı karar akışında birleştirir.</h2>
+        </div>
+        <p id="hero-summary">
+          Saha seçimi bekleniyor.
+        </p>
+      </section>
+
+      <section class="map-layout">
+        <section class="panel map-panel" id="map-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Saha haritası</p>
+              <h2>Aday ağaçlandırma alanları</h2>
+            </div>
+            <p class="panel-note">Poligona tıkla; skor, tür önerisi, model girdileri ve rapor otomatik güncellensin.</p>
+          </div>
+          <div class="map-legend">
+            <span><i class="legend high"></i>Yüksek</span>
+            <span><i class="legend medium"></i>Koşullu</span>
+            <span><i class="legend low"></i>Düşük</span>
+          </div>
+          <div id="leaflet-map" class="leaflet-map" aria-label="Ağaçlandırma uygunluk haritası"></div>
+        </section>
+
+        <aside class="panel score-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Model sonucu</p>
+              <h2 id="result-title">Saha analizi</h2>
+            </div>
+          </div>
+          <div class="score-ring" id="score-ring" role="img" aria-label="Uygunluk skoru">
+            <div>
+              <strong id="score-value">--</strong>
+              <span id="class-value">Hesaplanıyor</span>
+            </div>
+          </div>
+          <div class="recommendation" id="recommendation"></div>
+          <div class="factor-list" id="factor-list"></div>
+        </aside>
+      </section>
+
+      <section class="panel executive-panel">
+        <div class="panel-heading">
           <div>
-            <p class="eyebrow">Arazi planlama konsolu</p>
-            <h1>Ağaçlandırma Uygunluk Analiz Sistemi</h1>
-            <p class="header-copy">
-              Aday sahaları; topografya, iklim, toprak, erozyon ve erişim kriterlerine göre
-              puanlayan, tür önerisi ve uygulama önceliği üreten profesyonel GIS prototipi.
-            </p>
+            <p class="eyebrow">Yönetici görünümü</p>
+            <h2>Uygulama önceliği</h2>
           </div>
-          <section class="score-console" aria-live="polite">
-            <span>Seçili saha skoru</span>
-            <strong id="hero-score">--</strong>
-            <p id="hero-summary">Saha seçimi bekleniyor.</p>
-          </section>
-        </header>
+          <p class="panel-note">Karar verici için saha skoru, en güçlü aday ve tür önerisi özetlenir.</p>
+        </div>
+        <div class="executive-grid" id="executive-grid"></div>
+      </section>
 
-        <section class="metric-strip">
-          <article>
-            <span id="high-count">0</span>
-            <p>Yüksek uygunluk</p>
-          </article>
-          <article>
-            <span id="avg-score">0</span>
-            <p>Ortalama skor</p>
-          </article>
-          <article>
-            <span id="priority-species">-</span>
-            <p>Önerilen tür</p>
-          </article>
-        </section>
-
-        <section class="primary-grid">
-          <section class="panel map-panel" id="map-panel">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Saha haritası</p>
-                <h2>Aday ağaçlandırma alanları</h2>
-              </div>
-              <p class="panel-note">Poligona tıkla; model girdileri, tür önerileri ve rapor otomatik güncellensin.</p>
-            </div>
-            <div class="map-legend">
-              <span><i class="legend high"></i>Yüksek</span>
-              <span><i class="legend medium"></i>Koşullu</span>
-              <span><i class="legend low"></i>Düşük</span>
-            </div>
-            <div id="leaflet-map" class="leaflet-map" aria-label="Ağaçlandırma uygunluk haritası"></div>
-          </section>
-
-          <aside class="panel score-panel">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Model sonucu</p>
-                <h2 id="result-title">Saha analizi</h2>
-              </div>
-            </div>
-            <div class="score-ring" id="score-ring" role="img" aria-label="Uygunluk skoru">
-              <div>
-                <strong id="score-value">--</strong>
-                <span id="class-value">Hesaplanıyor</span>
-              </div>
-            </div>
-            <div class="recommendation" id="recommendation"></div>
-            <div class="factor-list" id="factor-list"></div>
-          </aside>
-        </section>
-
-        <section class="panel executive-panel">
+      <section class="analysis-layout">
+        <section class="panel analysis-panel" id="analysis-panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Yönetici görünümü</p>
-              <h2>Uygulama önceliği</h2>
+              <p class="eyebrow">Analiz modeli</p>
+              <h2>Parametre ve ağırlık yönetimi</h2>
             </div>
-            <p class="panel-note">Karar verici için saha skoru, en güçlü aday ve tür önerisi özetlenir.</p>
+            <p class="panel-note">Arazi değerlerini değiştirerek uygunluk skorunun nasıl etkilendiğini test et.</p>
           </div>
-          <div class="executive-grid" id="executive-grid"></div>
+
+          <div class="control-grid">
+            <label>
+              Saha profili
+              <select id="site-select"></select>
+            </label>
+            <label>
+              Hedef tür grubu
+              <select id="species-goal">
+                <option value="resilience">Kuraklığa dayanıklı türler</option>
+                <option value="soil">Toprak tutucu türler</option>
+                <option value="production">Üretim ve verim odaklı türler</option>
+              </select>
+            </label>
+            <label>
+              Eğim (%)
+              <input id="slope" type="number" min="0" max="80" value="14" />
+            </label>
+            <label>
+              Bakı
+              <select id="aspect">
+                <option value="92">Kuzey / serin bakı</option>
+                <option value="76" selected>Doğu / dengeli bakı</option>
+                <option value="58">Batı / sıcak bakı</option>
+                <option value="42">Güney / kurak bakı</option>
+              </select>
+            </label>
+            <label>
+              Yıllık yağış (mm)
+              <input id="rainfall" type="number" min="150" max="1600" value="620" />
+            </label>
+            <label>
+              Toprak derinliği (cm)
+              <input id="soil-depth" type="number" min="10" max="180" value="72" />
+            </label>
+            <label>
+              Erozyon riski
+              <select id="erosion">
+                <option value="90">Düşük</option>
+                <option value="66" selected>Orta</option>
+                <option value="34">Yüksek</option>
+              </select>
+            </label>
+            <label>
+              Yola uzaklık (km)
+              <input id="road-distance" type="number" min="0" max="40" step="0.1" value="3.5" />
+            </label>
+          </div>
+
+          <div class="weight-grid">
+            <label>
+              Topografya ağırlığı
+              <input id="w-topography" type="range" min="5" max="40" value="24" />
+            </label>
+            <label>
+              İklim ağırlığı
+              <input id="w-climate" type="range" min="5" max="40" value="24" />
+            </label>
+            <label>
+              Toprak ağırlığı
+              <input id="w-soil" type="range" min="5" max="40" value="28" />
+            </label>
+            <label>
+              Erişilebilirlik ağırlığı
+              <input id="w-access" type="range" min="5" max="40" value="12" />
+            </label>
+          </div>
         </section>
 
-        <section class="secondary-grid">
-          <section class="panel analysis-panel" id="analysis-panel">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Kriter modeli</p>
-                <h2>Parametre ve ağırlık yönetimi</h2>
-              </div>
-              <p class="panel-note">Arazi değerlerini değiştirerek uygunluk skorunun nasıl etkilendiğini test et.</p>
-            </div>
-
-            <div class="control-grid">
-              <label>
-                Saha profili
-                <select id="site-select"></select>
-              </label>
-              <label>
-                Hedef tür grubu
-                <select id="species-goal">
-                  <option value="resilience">Kuraklığa dayanıklı türler</option>
-                  <option value="soil">Toprak tutucu türler</option>
-                  <option value="production">Üretim ve verim odaklı türler</option>
-                </select>
-              </label>
-              <label>
-                Eğim (%)
-                <input id="slope" type="number" min="0" max="80" value="14" />
-              </label>
-              <label>
-                Bakı
-                <select id="aspect">
-                  <option value="92">Kuzey / serin bakı</option>
-                  <option value="76" selected>Doğu / dengeli bakı</option>
-                  <option value="58">Batı / sıcak bakı</option>
-                  <option value="42">Güney / kurak bakı</option>
-                </select>
-              </label>
-              <label>
-                Yıllık yağış (mm)
-                <input id="rainfall" type="number" min="150" max="1600" value="620" />
-              </label>
-              <label>
-                Toprak derinliği (cm)
-                <input id="soil-depth" type="number" min="10" max="180" value="72" />
-              </label>
-              <label>
-                Erozyon riski
-                <select id="erosion">
-                  <option value="90">Düşük</option>
-                  <option value="66" selected>Orta</option>
-                  <option value="34">Yüksek</option>
-                </select>
-              </label>
-              <label>
-                Yola uzaklık (km)
-                <input id="road-distance" type="number" min="0" max="40" step="0.1" value="3.5" />
-              </label>
-            </div>
-
-            <div class="weight-grid">
-              <label>
-                Topografya ağırlığı
-                <input id="w-topography" type="range" min="5" max="40" value="24" />
-              </label>
-              <label>
-                İklim ağırlığı
-                <input id="w-climate" type="range" min="5" max="40" value="24" />
-              </label>
-              <label>
-                Toprak ağırlığı
-                <input id="w-soil" type="range" min="5" max="40" value="28" />
-              </label>
-              <label>
-                Erişilebilirlik ağırlığı
-                <input id="w-access" type="range" min="5" max="40" value="12" />
-              </label>
-            </div>
-          </section>
-
-          <aside class="panel species-panel" id="species-panel">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Tür öneri motoru</p>
-                <h2>Önerilen ağaç türleri</h2>
-              </div>
-            </div>
-            <div class="species-list" id="species-list"></div>
-          </aside>
-        </section>
-
-        <section class="panel comparison-panel">
+        <aside class="panel species-panel" id="species-panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Saha portföyü</p>
-              <h2>Öncelik matrisi</h2>
+              <p class="eyebrow">Tür öneri motoru</p>
+              <h2>Önerilen ağaç türleri</h2>
             </div>
-            <p class="panel-note">Aday sahalar skor, baskı türü ve uygulama sınıfına göre sıralanır.</p>
           </div>
-          <div class="site-table" id="site-table"></div>
-        </section>
+          <div class="species-list" id="species-list"></div>
+        </aside>
+      </section>
 
-        <section class="panel report-panel" id="report-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Rapor merkezi</p>
-              <h2>Uygulama notu</h2>
-            </div>
-            <p class="panel-note">Mülakatta anlatılabilecek karar destek çıktısı formatında hazırlanır.</p>
+      <section class="panel comparison-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Saha portföyü</p>
+            <h2>Öncelik matrisi</h2>
           </div>
-          <div class="report-preview" id="report-preview"></div>
-        </section>
-      </main>
-    </div>
+          <p class="panel-note">Aday sahalar skor, baskı türü ve uygulama sınıfına göre sıralanır.</p>
+        </div>
+        <div class="site-table" id="site-table"></div>
+      </section>
+
+      <section class="panel report-panel" id="report-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Rapor merkezi</p>
+            <h2>Uygulama notu</h2>
+          </div>
+          <p class="panel-note">Mülakatta anlatılabilecek karar destek çıktısı formatında hazırlanır.</p>
+        </div>
+        <div class="report-preview" id="report-preview"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <strong>Ağaçlandırma Uygunluk Analiz Sistemi</strong>
+      <span>Bağımsız portföy prototipi · Abidin CAN</span>
+    </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="script.js"></script>
