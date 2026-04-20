@@ -1,0 +1,9 @@
+{
+  "name": "Ağaçlandırma Uygunluk Analiz Sistemi",
+  "short_name": "Ağaçlandırma Analiz",
+  "description": "Çok kriterli arazi uygunluğu ve tür önerisi üreten GIS karar destek prototipi.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f0e6",
+  "theme_color": "#253629"
+}

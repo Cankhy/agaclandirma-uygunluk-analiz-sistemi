@@ -1,18 +1,18 @@
 # Ağaçlandırma Uygunluk Analiz Sistemi
 
-Arazi kriterlerini, harita katmanlarını ve tür öneri motorunu birleştiren GIS tabanlı karar destek prototipi.
+Çok kriterli arazi uygunluğu, tür önerisi ve saha önceliklendirme üreten GIS tabanlı karar destek prototipi.
 
-Bu proje, orman yangını risk sistemiyle aynı portföy çizgisinde geliştirilmiştir. Amaç; yalnızca arayüz yapmak değil, konumsal veri, çok kriterli analiz, tür seçimi ve uygulama önceliği mantığını tek ürün deneyiminde gösterebilmektir.
+Bu proje, ilk projedeki yangın izleme yapısına benzemeyecek şekilde ayrı bir ürün diliyle tasarlandı. Büyük tanıtım sayfası yerine sol menülü, harita merkezli ve analiz konsolu hissi veren profesyonel bir çalışma alanı kullanır.
 
 ## Öne Çıkan Modüller
 
-- Leaflet tabanlı aday saha haritası
-- Eğim, bakı, yağış, toprak, erozyon ve erişim kriterleri
-- Ayarlanabilir kriter ağırlıkları
+- Harita merkezli aday saha analizi
+- Eğim, bakı, yağış, toprak derinliği, erozyon ve erişim kriterleri
+- Ayarlanabilir model ağırlıkları
 - Ağaç türü öneri motoru
 - Saha öncelik matrisi
 - Yönetici özeti ve uygulama raporu
-- Türkçe, responsive ve portföy odaklı arayüz
+- GitHub Pages otomatik yayın workflow'u
 
 ## Kullanılan Teknolojiler
 
@@ -21,6 +21,7 @@ Bu proje, orman yangını risk sistemiyle aynı portföy çizgisinde geliştiril
 - JavaScript
 - Leaflet
 - GeoJSON
+- GitHub Pages
 
 ## Çalıştırma
 
@@ -38,15 +39,25 @@ npm run lint
 
 ## Veri Katmanı
 
-- `data/afforestation-sites.geojson`: Prototipte kullanılan aday ağaçlandırma sahaları
+- `data/afforestation-sites.geojson`: Aday ağaçlandırma sahaları
+
+## GitHub Pages
+
+Repo GitHub'a gönderildikten sonra `Settings > Pages` ekranında kaynak olarak `GitHub Actions` seçilir. `main` dalına yapılan push sonrası site otomatik yayın alır.
+
+Canlı link formatı:
+
+```text
+https://kullanici-adin.github.io/agaclandirma-uygunluk-analiz-sistemi/
+```
 
 ## Portföy Değeri
 
-Bu proje şu mesajı verir:
+Bu repo şu mesajı verir:
 
-> Konumsal veriyi yalnızca haritada göstermiyor; karar destek modeli, tür önerisi ve uygulama önceliği üretebiliyor.
+> Konumsal veriyi sadece haritada göstermiyor; arazi kriterlerinden karar destek skoru, tür önerisi ve uygulama önceliği üretebiliyor.
 
-GIS, kamu teknolojileri, orman mühendisliği yazılımları, arazi analiz sistemleri ve çevresel karar destek projeleri için güçlü bir portföy parçası olacak şekilde tasarlanmıştır.
+GIS, kamu teknolojileri, orman mühendisliği yazılımları, çevresel karar destek sistemleri ve arazi planlama projeleri için güçlü bir portföy parçası olacak şekilde hazırlanmıştır.
 
 ## Not
 
