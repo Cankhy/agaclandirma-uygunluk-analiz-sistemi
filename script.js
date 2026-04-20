@@ -36,6 +36,8 @@ const elements = {
   costGrid: document.querySelector("#cost-grid"),
   timelineList: document.querySelector("#timeline-list"),
   compareGrid: document.querySelector("#compare-grid"),
+  scenarioGrid: document.querySelector("#scenario-grid"),
+  qualityGrid: document.querySelector("#quality-grid"),
   reportPreview: document.querySelector("#report-preview"),
   downloadReport: document.querySelector("#download-report"),
   downloadPdf: document.querySelector("#download-pdf"),
@@ -259,6 +261,33 @@ function calculateSite(site) {
   return { ...scenarioSite, factors, weights, score, classInfo: classify(score) };
 }
 
+function calculateSiteForScenario(site, scenarioKey) {
+  const scenario = scenarioConfig[scenarioKey] ?? scenarioConfig.normal;
+  const scenarioSite = {
+    ...site,
+    rainfall: clamp(Number(site.rainfall) + scenario.rainfall, 150, 1600),
+    scenarioScoreBoost: scenario.score,
+    scenarioLabel: scenario.label,
+    scenarioNote: scenario.note
+  };
+  const factors = {
+    Topografya: Math.round((normalizeSlope(scenarioSite.slope) + Number(scenarioSite.aspect)) / 2),
+    İklim: Math.round(normalizeRainfall(scenarioSite.rainfall)),
+    Toprak: Math.round((normalizeSoil(scenarioSite.soilDepth) + Number(scenarioSite.erosion)) / 2),
+    Erişim: Math.round(normalizeAccess(scenarioSite.roadDistance))
+  };
+  const weights = {
+    Topografya: Number(inputs.wTopography.value),
+    İklim: Number(inputs.wClimate.value),
+    Toprak: Number(inputs.wSoil.value),
+    Erişim: Number(inputs.wAccess.value)
+  };
+  const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
+  const weightedScore = Math.round(Object.entries(factors).reduce((sum, [key, value]) => sum + value * weights[key], 0) / totalWeight);
+  const score = clamp(weightedScore + scenario.score + getWeatherAdjustment(scenarioSite), 18, 98);
+  return { ...scenarioSite, factors, weights, score, classInfo: classify(score), scenarioKey };
+}
+
 function getActiveInputSite() {
   const base = sites.find((site) => site.id === activeSiteId) ?? sites[0];
   return {
@@ -383,6 +412,26 @@ function getFeasibility(active) {
   return { terrainDifficulty, maintenanceNeed, costIndex, riskLabel };
 }
 
+function getQualityAssessment(active) {
+  const feasibility = getFeasibility(active);
+  const hasWeather = Boolean(liveWeatherBySite[active.id]);
+  const hasSoil = Boolean(soilDataBySite[active.id]);
+  const hasOgm = ogmForestAssets.length >= 6;
+  const sourceScore = (hasWeather ? 28 : 12) + (hasSoil ? 28 : 12) + (hasOgm ? 24 : 8) + 20;
+  const survivalScore = clamp(Math.round(active.score * 0.72 + (100 - feasibility.maintenanceNeed) * 0.28), 18, 96);
+  const maintenanceClass = feasibility.maintenanceNeed >= 70 ? "Yoğun bakım" : feasibility.maintenanceNeed >= 45 ? "Kontrollü bakım" : "Standart bakım";
+  const auditNote = hasWeather && hasSoil && hasOgm
+    ? "Canlı hava, SoilGrids ve OGM açık veri referansları birlikte okunuyor."
+    : "Canlı servislerden biri beklemede; yerel GeoJSON modeli güvenli yedek olarak çalışıyor.";
+  return {
+    sourceScore: clamp(sourceScore, 0, 100),
+    survivalScore,
+    maintenanceClass,
+    auditNote,
+    fieldRisk: active.score >= 76 ? "Düşük saha riski" : active.score >= 58 ? "Orta saha riski" : "Yüksek saha riski"
+  };
+}
+
 function renderCost(active) {
   const feasibility = getFeasibility(active);
   const weather = liveWeatherBySite[active.id];
@@ -458,10 +507,61 @@ function renderCompare(calculatedSites) {
   }).join("");
 }
 
+function renderScenarioComparison(active) {
+  if (!elements.scenarioGrid) return;
+  const baseSite = getActiveInputSite();
+  const normalScore = calculateSiteForScenario(baseSite, "normal").score;
+  elements.scenarioGrid.innerHTML = Object.entries(scenarioConfig).map(([key, scenario]) => {
+    const result = calculateSiteForScenario(baseSite, key);
+    const delta = result.score - normalScore;
+    const deltaLabel = delta === 0 ? "Referans" : `${delta > 0 ? "+" : ""}${delta} puan`;
+    return `
+      <article class="scenario-card ${key === inputs.scenarioSelect.value ? "is-active" : ""}">
+        <span class="eyebrow">${scenario.label}</span>
+        <strong>${result.score}/100</strong>
+        <p>${result.classInfo.label} · yağış ${result.rainfall} mm</p>
+        <p>${scenario.note}</p>
+        <span class="scenario-delta">${deltaLabel}</span>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderQualityPanel(active) {
+  if (!elements.qualityGrid) return;
+  const quality = getQualityAssessment(active);
+  const feasibility = getFeasibility(active);
+  elements.qualityGrid.innerHTML = `
+    <article class="quality-card">
+      <span class="eyebrow">Kaynak güveni</span>
+      <strong>${quality.sourceScore}/100</strong>
+      <div class="quality-meter"><span style="width:${quality.sourceScore}%"></span></div>
+      <p>${quality.auditNote}</p>
+    </article>
+    <article class="quality-card">
+      <span class="eyebrow">Tutma başarısı</span>
+      <strong>${quality.survivalScore}/100</strong>
+      <div class="quality-meter"><span style="width:${quality.survivalScore}%"></span></div>
+      <p>Skor ve bakım ihtiyacına göre ilk üç yıl başarı beklentisi.</p>
+    </article>
+    <article class="quality-card">
+      <span class="eyebrow">Bakım sınıfı</span>
+      <strong>${quality.maintenanceClass}</strong>
+      <p>Bakım ihtiyacı ${feasibility.maintenanceNeed}/100. Sulama, tamamlama ve ot alma programı buna göre planlanır.</p>
+    </article>
+    <article class="quality-card">
+      <span class="eyebrow">Saha riski</span>
+      <strong>${quality.fieldRisk}</strong>
+      <p>Erozyon, erişim, toprak derinliği ve iklim duyarlılığı birlikte değerlendirilir.</p>
+    </article>
+  `;
+}
+
 function renderReport(active) {
   const species = getRecommendedSpecies(active)[0];
   const weather = liveWeatherBySite[active.id];
   const soil = soilDataBySite[active.id];
+  const quality = getQualityAssessment(active);
   elements.reportPreview.innerHTML = `
     <strong>${active.name} için uygulama değerlendirmesi</strong>
     <p>${active.district} hattında yer alan saha ${active.score}/100 uygunluk skoru ile ${active.classInfo.label.toLowerCase()} sınıfındadır.</p>
@@ -472,6 +572,8 @@ function renderReport(active) {
       <article class="report-row"><span>Önerilen tür</span><strong>${species?.name ?? "-"}</strong></article>
       <article class="report-row"><span>Canlı hava</span><strong>${weather ? `${weather.temperature}°C / %${weather.humidity}` : "Bekleniyor"}</strong></article>
       <article class="report-row"><span>SoilGrids</span><strong>${soil ? `pH ${soil.ph}` : "Bekleniyor"}</strong></article>
+      <article class="report-row"><span>Kaynak güveni</span><strong>${quality.sourceScore}/100</strong></article>
+      <article class="report-row"><span>Tutma başarısı</span><strong>${quality.survivalScore}/100</strong></article>
     </div>
   `;
 }
@@ -479,9 +581,17 @@ function renderReport(active) {
 function getReportText() {
   const active = calculateSite(getActiveInputSite());
   const species = getRecommendedSpecies(active);
+  const quality = getQualityAssessment(active);
   const factors = Object.entries(active.factors).map(([name, value]) => `${name}: ${value}/100`).join("\n");
+  const scenarioRows = Object.keys(scenarioConfig)
+    .map((key) => {
+      const result = calculateSiteForScenario(getActiveInputSite(), key);
+      return `${result.scenarioLabel}: ${result.score}/100 - ${result.classInfo.label}`;
+    })
+    .join("\n");
   return [
     "Ağaçlandırma Uygunluk Analiz Sistemi",
+    `Üretim zamanı: ${new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeStyle: "short" }).format(new Date())}`,
     "",
     `Saha: ${active.name}`,
     `Konum: ${active.district}`,
@@ -493,12 +603,18 @@ function getReportText() {
     "Kriter skorları:",
     factors,
     "",
+    "Senaryo kıyaslaması:",
+    scenarioRows,
+    "",
     "Önerilen türler:",
     ...species.map((item, index) => `${index + 1}. ${item.name} - uyum ${Math.round(item.fit)}/100 - ${item.note}`),
     "",
     "Fizibilite:",
     `Uygulama zorluğu: ${getFeasibility(active).costIndex}/100`,
     `Bakım ihtiyacı: ${getFeasibility(active).maintenanceNeed}/100`,
+    `Kaynak güveni: ${quality.sourceScore}/100`,
+    `Tutma başarısı tahmini: ${quality.survivalScore}/100`,
+    `Bakım sınıfı: ${quality.maintenanceClass}`,
     `Senaryo: ${active.scenarioLabel}`,
     `Canlı hava: ${liveWeatherBySite[active.id] ? `${liveWeatherBySite[active.id].temperature}°C, %${liveWeatherBySite[active.id].humidity} nem` : "veri bekleniyor"}`,
     `SoilGrids: ${soilDataBySite[active.id] ? `pH ${soilDataBySite[active.id].ph}, kil ${soilDataBySite[active.id].clay} g/kg` : "veri bekleniyor"}`,
@@ -529,16 +645,22 @@ function downloadPdfReport() {
     return;
   }
   const active = calculateSite(getActiveInputSite());
+  const quality = getQualityAssessment(active);
+  const species = getRecommendedSpecies(active)[0];
   const doc = new JsPdf({ unit: "pt", format: "a4" });
   const lines = doc.splitTextToSize(getReportText(), 500);
+  doc.setFillColor(23, 32, 51);
+  doc.rect(0, 0, 595, 96, "F");
+  doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("Agaclandirma Uygunluk Analiz Raporu", 48, 52);
+  doc.setFontSize(18);
+  doc.text("Agaclandirma Uygunluk Analiz Raporu", 48, 42);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(`Saha: ${active.name}`, 48, 76);
-  doc.text(`Skor: ${active.score}/100`, 48, 92);
-  doc.text(lines, 48, 122);
+  doc.text(`Saha: ${active.name}`, 48, 62);
+  doc.text(`Skor: ${active.score}/100 · Kaynak guveni: ${quality.sourceScore}/100 · Tur: ${species?.name ?? "-"}`, 48, 78);
+  doc.setTextColor(23, 32, 51);
+  doc.text(lines, 48, 126);
   doc.save("agaclandirma-uygunluk-raporu.pdf");
 }
 
@@ -614,6 +736,8 @@ function renderAll() {
   renderSpecies(active);
   renderTable(calculatedSites);
   renderCompare(calculatedSites);
+  renderScenarioComparison(active);
+  renderQualityPanel(active);
   renderReport(active);
   renderMap(calculatedSites);
 }

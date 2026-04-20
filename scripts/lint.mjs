@@ -56,10 +56,10 @@ try {
   fail(`OGM data parse error: ${error.message}`);
 }
 
-if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && html.includes('id="report-preview"') && html.includes('id="live-data-grid"') && html.includes('id="ogm-grid"')) {
-  ok("HTML includes map, species recommendation, live data, OGM data, and report modules");
+if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && html.includes('id="report-preview"') && html.includes('id="live-data-grid"') && html.includes('id="ogm-grid"') && html.includes('id="scenario-grid"') && html.includes('id="quality-grid"')) {
+  ok("HTML includes map, species recommendation, live data, OGM data, scenario, quality, and report modules");
 } else {
-  fail("HTML must include map, species recommendation, live data, OGM data, and report modules");
+  fail("HTML must include map, species recommendation, live data, OGM data, scenario, quality, and report modules");
 }
 
 if (html.includes("<link rel=\"canonical\"") && html.includes("<link rel=\"icon\"") && html.includes("<link rel=\"manifest\"")) {
@@ -74,8 +74,8 @@ if (html.includes("Ağaçlandırma") && html.includes("Uygunluk") && html.includ
   fail("HTML Turkish copy is missing expected phrases");
 }
 
-if (css.includes(".leaflet-map") && css.includes(".score-ring") && css.includes(".species-card")) {
-  ok("CSS includes map, score, and species styles");
+if (css.includes(".leaflet-map") && css.includes(".score-ring") && css.includes(".species-card") && css.includes(".scenario-card") && css.includes(".quality-card")) {
+  ok("CSS includes map, score, species, scenario, and quality styles");
 } else {
   fail("CSS is missing expected styles");
 }
@@ -99,10 +99,10 @@ if (Array.isArray(ogm?.records) && ogm.records.length >= 6 && ogm.records.every(
   fail("OGM public forest asset data must include sourced records");
 }
 
-if (js.includes('fetch("data/afforestation-sites.geojson")') && js.includes("data/ogm-public-forest-assets.json") && js.includes("speciesCatalog") && js.includes("calculateSite") && js.includes("https://api.open-meteo.com/v1/forecast") && js.includes("https://rest.isric.org/soilgrids/v2.0/properties/query") && js.includes("jsPDF")) {
-  ok("JavaScript loads local, OGM, weather, soil, PDF, and suitability data");
+if (js.includes('fetch("data/afforestation-sites.geojson")') && js.includes("data/ogm-public-forest-assets.json") && js.includes("speciesCatalog") && js.includes("calculateSite") && js.includes("calculateSiteForScenario") && js.includes("getQualityAssessment") && js.includes("https://api.open-meteo.com/v1/forecast") && js.includes("https://rest.isric.org/soilgrids/v2.0/properties/query") && js.includes("jsPDF")) {
+  ok("JavaScript loads local, OGM, weather, soil, PDF, scenario, quality, and suitability data");
 } else {
-  fail("JavaScript must load GeoJSON, OGM references, live weather, soil data, PDF logic, and include suitability logic");
+  fail("JavaScript must load GeoJSON, OGM references, live weather, soil data, PDF logic, scenario comparison, quality assessment, and suitability logic");
 }
 
 if (readme.includes("Ağaçlandırma Uygunluk Analiz Sistemi") && readme.includes("npm run lint")) {

@@ -22,6 +22,8 @@ Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi 
 - Maliyet ve uygulama zorluğu tahmini
 - Hazırlık, dikim, bakım ve izleme takvimi
 - Saha öncelik matrisi ve karşılaştırmalı analiz
+- İklim senaryosu kıyaslama paneli
+- Veri güveni, bakım sınıfı ve tutma başarısı kontrol paneli
 - Rapor metni indirme ve yazdırılabilir görünüm
 - jsPDF ile PDF rapor oluşturma
 - Tarayıcı önbelleği ile canlı servis çağrılarını azaltma
@@ -77,6 +79,14 @@ Model dört ana kriter grubunu birlikte değerlendirir:
 - Erişim: yol uzaklığı ve uygulama lojistiği
 
 Bu kriterler kullanıcı tarafından değiştirilebilen ağırlıklarla tek uygunluk skoruna dönüştürülür. Tür öneri motoru, hedef tür grubu ve saha koşullarına göre önerileri sıralar.
+
+## Karar Destek Çıktıları
+
+- Senaryo kıyaslama: seçili sahanın normal yıl, kurak yıl ve yüksek yağış yılı skorlarını yan yana gösterir.
+- Veri güveni: Open-Meteo, SoilGrids, OGM açık veri referansları ve yerel GeoJSON katmanlarının kullanılabilirliğini özetler.
+- Tutma başarısı: uygunluk skoru ve bakım ihtiyacına göre ilk üç yıl başarı beklentisini üretir.
+- Bakım sınıfı: standart, kontrollü veya yoğun bakım ihtiyacını saha bazında sınıflandırır.
+- PDF raporu: skor, tür önerisi, senaryo kıyaslaması, kaynak güveni ve uygulama notunu tek dosyada toplar.
 
 ## GitHub Pages
 
