@@ -146,8 +146,20 @@ h2,
   font-weight: 800;
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.language-toggle:hover {
   background: rgba(47, 128, 237, 0.11);
+}
+
+.language-toggle {
+  min-height: 38px;
+  padding: 0 14px;
+  color: var(--forest);
+  background: #eef3f9;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
 }
 
 .hero {
@@ -530,6 +542,59 @@ h2 {
   margin-top: 14px;
 }
 
+.data-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr) minmax(220px, 0.7fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 18px;
+}
+
+.upload-box,
+.database-status {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px dashed rgba(47, 128, 237, 0.34);
+}
+
+.upload-box {
+  cursor: pointer;
+}
+
+.upload-box span,
+.database-status {
+  font-weight: 900;
+}
+
+.upload-box small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.upload-box input,
+.media-upload input {
+  margin-top: 12px;
+}
+
+.database-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.database-actions button {
+  min-height: 44px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: #172033;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
 .live-data-card,
 .source-list article {
   padding: 16px;
@@ -648,6 +713,39 @@ h2 {
 
 .factor-list {
   margin-top: 16px;
+}
+
+.media-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+}
+
+.media-upload {
+  margin-top: 10px;
+}
+
+.media-preview {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 16px;
+  color: var(--muted);
+  background:
+    radial-gradient(circle at top right, rgba(47, 128, 237, 0.14), transparent 28%),
+    #f8fafc;
+  border: 1px solid var(--line);
+}
+
+.media-preview img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
 }
 
 .factor {
@@ -1024,6 +1122,7 @@ a:focus-visible {
   .scenario-grid,
   .quality-grid,
   .live-data-grid,
+  .data-tools,
   .source-list,
   .ogm-grid,
   .report-grid,

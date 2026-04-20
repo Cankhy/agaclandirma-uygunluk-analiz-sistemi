@@ -41,6 +41,7 @@
           <a href="#species-panel">Tür Önerisi</a>
           <a href="#scenario-panel">Senaryo</a>
           <a href="#report-panel">Rapor</a>
+          <button class="language-toggle" type="button" id="language-toggle">EN</button>
         </div>
       </nav>
 
@@ -130,6 +131,18 @@
           <p class="panel-note">Canlı hava verisi Open-Meteo üzerinden, aktif saha toprak göstergesi SoilGrids üzerinden okunur.</p>
         </div>
         <div class="live-data-grid" id="live-data-grid"></div>
+        <div class="data-tools">
+          <label class="upload-box">
+            <span>Gerçek saha poligonu yükle</span>
+            <small>GeoJSON veya SHP ZIP dosyası ekleyerek kendi saha verini modele dahil edebilirsin.</small>
+            <input id="dataset-upload" type="file" accept=".geojson,.json,.zip" />
+          </label>
+          <div class="database-actions">
+            <button type="button" id="export-dataset">Veriyi Dışa Aktar</button>
+            <button type="button" id="reset-dataset">Demo Veriye Dön</button>
+          </div>
+          <p class="database-status" id="database-status">Yerel tarayıcı veritabanı hazır.</p>
+        </div>
         <div class="source-list">
           <article>
             <span>Open-Meteo</span>
@@ -175,6 +188,7 @@
             <button class="layer-toggle" type="button" data-layer="erosion">Erozyon</button>
             <button class="layer-toggle" type="button" data-layer="rainfall">Yağış</button>
             <button class="layer-toggle" type="button" data-layer="access">Erişim</button>
+            <button class="layer-toggle" type="button" data-basemap="satellite">Uydu Altlığı</button>
           </div>
           <div class="map-legend">
             <span><i class="legend high"></i>Yüksek</span>
@@ -199,6 +213,14 @@
           </div>
           <div class="recommendation" id="recommendation"></div>
           <div class="factor-list" id="factor-list"></div>
+          <div class="media-panel">
+            <p class="eyebrow">Saha görseli</p>
+            <label class="media-upload">
+              Fotoğraf / uydu ekran görüntüsü ekle
+              <input id="site-image-upload" type="file" accept="image/*" />
+            </label>
+            <div class="media-preview" id="site-media-preview"></div>
+          </div>
         </aside>
       </section>
 
@@ -414,6 +436,7 @@
     </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="script.js?v=20260420-2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shpjs@6.1.0/dist/shp.min.js"></script>
+    <script src="script.js?v=20260420-3"></script>
   </body>
 </html>

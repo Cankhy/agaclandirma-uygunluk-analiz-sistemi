@@ -41,7 +41,20 @@ const elements = {
   reportPreview: document.querySelector("#report-preview"),
   downloadReport: document.querySelector("#download-report"),
   downloadPdf: document.querySelector("#download-pdf"),
-  printReport: document.querySelector("#print-report")
+  printReport: document.querySelector("#print-report"),
+  datasetUpload: document.querySelector("#dataset-upload"),
+  exportDataset: document.querySelector("#export-dataset"),
+  resetDataset: document.querySelector("#reset-dataset"),
+  databaseStatus: document.querySelector("#database-status"),
+  siteImageUpload: document.querySelector("#site-image-upload"),
+  siteMediaPreview: document.querySelector("#site-media-preview"),
+  languageToggle: document.querySelector("#language-toggle")
+};
+
+const storageKeys = {
+  sites: "au-local-sites-v1",
+  images: "au-site-images-v1",
+  language: "au-language-v1"
 };
 
 const fallbackSites = [
@@ -156,14 +169,20 @@ const speciesCatalog = {
 };
 
 let sites = fallbackSites;
+let defaultSites = fallbackSites;
 let activeSiteId = fallbackSites[0].id;
 let map;
 let siteLayer;
+let standardBaseLayer;
+let satelliteBaseLayer;
 let activeLayer = "suitability";
+let activeBasemap = "standard";
 let liveWeatherBySite = {};
 let soilDataBySite = {};
 let liveDataState = { weather: "loading", soil: "waiting", updatedAt: null };
 let ogmForestAssets = [];
+let siteImages = JSON.parse(localStorage.getItem(storageKeys.images) || "{}");
+let activeLanguage = localStorage.getItem(storageKeys.language) || "tr";
 
 const scenarioConfig = {
   normal: { label: "Normal yıl", rainfall: 0, score: 0, note: "Uzun dönem ortalamalarına yakın saha koşulları." },
@@ -173,6 +192,149 @@ const scenarioConfig = {
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+function persistSites() {
+  localStorage.setItem(storageKeys.sites, JSON.stringify(sites));
+  if (elements.databaseStatus) {
+    elements.databaseStatus.textContent = `${sites.length} saha yerel tarayıcı veritabanında saklanıyor.`;
+  }
+}
+
+function loadStoredSites() {
+  const stored = localStorage.getItem(storageKeys.sites);
+  if (!stored) return false;
+  try {
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed) || !parsed.length) return false;
+    sites = parsed;
+    activeSiteId = sites[0].id;
+    return true;
+  } catch (error) {
+    console.warn("Yerel saha verisi okunamadı:", error);
+    localStorage.removeItem(storageKeys.sites);
+    return false;
+  }
+}
+
+function normalizeUploadedFeature(feature, index) {
+  const props = feature.properties ?? {};
+  const fallback = sites[index % sites.length] ?? fallbackSites[0];
+  const id = props.id || `uploaded-${Date.now()}-${index + 1}`;
+  return {
+    id,
+    name: props.name || props.saha || props.SAHA_ADI || `Yüklenen Saha ${index + 1}`,
+    district: props.district || props.ilce || props.ILCE || props.location || "Kullanıcı verisi",
+    macroRegion: props.macroRegion || props.region || props.bolge || "Yüklenen saha",
+    slope: Number(props.slope ?? props.egim ?? fallback.slope),
+    aspect: Number(props.aspect ?? props.baki ?? fallback.aspect),
+    rainfall: Number(props.rainfall ?? props.yagis ?? fallback.rainfall),
+    soilDepth: Number(props.soilDepth ?? props.toprak ?? fallback.soilDepth),
+    erosion: Number(props.erosion ?? props.erozyon ?? fallback.erosion),
+    roadDistance: Number(props.roadDistance ?? props.yol ?? fallback.roadDistance),
+    vegetation: props.vegetation || props.bitki || "Yüklenen saha örtüsü",
+    pressure: props.pressure || props.baski || "Kullanıcı tarafından yüklenen saha",
+    geometry: feature.geometry?.coordinates ?? fallback.geometry
+  };
+}
+
+function normalizeUploadedGeoJson(payload) {
+  const collection = Array.isArray(payload) ? payload[0] : payload;
+  const features = collection?.type === "FeatureCollection" ? collection.features : [];
+  return features
+    .filter((feature) => ["Polygon", "MultiPolygon"].includes(feature.geometry?.type))
+    .map((feature, index) => {
+      const normalized = normalizeUploadedFeature(feature, index);
+      if (feature.geometry.type === "MultiPolygon") {
+        normalized.geometry = feature.geometry.coordinates[0];
+      }
+      return normalized;
+    });
+}
+
+async function handleDatasetUpload(file) {
+  if (!file) return;
+  try {
+    let payload;
+    if (file.name.toLowerCase().endsWith(".zip")) {
+      if (!window.shp) throw new Error("SHP dönüştürücü yüklenemedi.");
+      payload = await window.shp(await file.arrayBuffer());
+    } else {
+      payload = JSON.parse(await file.text());
+    }
+    const uploadedSites = normalizeUploadedGeoJson(payload);
+    if (!uploadedSites.length) throw new Error("Dosyada Polygon veya MultiPolygon saha bulunamadı.");
+    sites = [...sites, ...uploadedSites];
+    activeSiteId = uploadedSites[0].id;
+    populateSiteSelect();
+    syncInputsFromSite(uploadedSites[0]);
+    persistSites();
+    await loadSoilDataForActiveSite();
+    renderAll();
+  } catch (error) {
+    if (elements.databaseStatus) {
+      elements.databaseStatus.textContent = `Yükleme başarısız: ${error.message}`;
+    }
+  }
+}
+
+function exportCurrentDataset() {
+  const payload = {
+    type: "FeatureCollection",
+    exportedAt: new Date().toISOString(),
+    features: sites.map((site) => ({
+      type: "Feature",
+      properties: { ...site, geometry: undefined },
+      geometry: { type: "Polygon", coordinates: site.geometry }
+    }))
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/geo+json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "agaclandirma-saha-veritabani.geojson";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetDataset() {
+  localStorage.removeItem(storageKeys.sites);
+  sites = defaultSites;
+  activeSiteId = sites[0].id;
+  populateSiteSelect();
+  syncInputsFromSite(sites[0]);
+  persistSites();
+  renderAll();
+}
+
+function renderSiteMedia(active) {
+  if (!elements.siteMediaPreview) return;
+  const image = siteImages[active.id];
+  elements.siteMediaPreview.innerHTML = image
+    ? `<img src="${image}" alt="${active.name} saha görseli" />`
+    : `<span>Bu saha için fotoğraf veya uydu ekran görüntüsü eklenmedi.</span>`;
+}
+
+function handleSiteImageUpload(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    siteImages[activeSiteId] = reader.result;
+    localStorage.setItem(storageKeys.images, JSON.stringify(siteImages));
+    renderAll();
+  });
+  reader.readAsDataURL(file);
+}
+
+function applyLanguage() {
+  const isEnglish = activeLanguage === "en";
+  document.documentElement.lang = isEnglish ? "en" : "tr";
+  elements.languageToggle.textContent = isEnglish ? "TR" : "EN";
+  document.querySelector(".hero .eyebrow").textContent = isEnglish ? "Land planning and decision support system" : "Arazi planlama ve karar destek sistemi";
+  document.querySelector(".hero h1").textContent = isEnglish ? "Afforestation Suitability Analysis System" : "Ağaçlandırma Uygunluk Analiz Sistemi";
+  document.querySelector(".hero-copy").textContent = isEnglish
+    ? "A professional GIS prototype that scores candidate sites by topography, climate, soil, erosion and access criteria, then produces species recommendations and implementation priority."
+    : "Aday sahaları; topografya, iklim, toprak, erozyon ve erişim kriterlerine göre puanlayan, uygun tür seçimi ve uygulama önceliği üreten profesyonel GIS prototipi.";
 }
 
 function normalizeSlope(value) {
@@ -567,6 +729,7 @@ function renderReport(active) {
   const weather = liveWeatherBySite[active.id];
   const soil = soilDataBySite[active.id];
   const quality = getQualityAssessment(active);
+  const hasMedia = Boolean(siteImages[active.id]);
   elements.reportPreview.innerHTML = `
     <strong>${active.name} için uygulama değerlendirmesi</strong>
     <p>${active.district} hattında yer alan saha ${active.score}/100 uygunluk skoru ile ${active.classInfo.label.toLowerCase()} sınıfındadır.</p>
@@ -579,6 +742,7 @@ function renderReport(active) {
       <article class="report-row"><span>SoilGrids</span><strong>${soil ? `pH ${soil.ph}` : "Bekleniyor"}</strong></article>
       <article class="report-row"><span>Kaynak güveni</span><strong>${quality.sourceScore}/100</strong></article>
       <article class="report-row"><span>Tutma başarısı</span><strong>${quality.survivalScore}/100</strong></article>
+      <article class="report-row"><span>Saha görseli</span><strong>${hasMedia ? "Eklendi" : "Bekleniyor"}</strong></article>
     </div>
   `;
 }
@@ -620,6 +784,7 @@ function getReportText() {
     `Kaynak güveni: ${quality.sourceScore}/100`,
     `Tutma başarısı tahmini: ${quality.survivalScore}/100`,
     `Bakım sınıfı: ${quality.maintenanceClass}`,
+    `Saha görseli: ${siteImages[active.id] ? "eklendi" : "bekleniyor"}`,
     `Senaryo: ${active.scenarioLabel}`,
     `Canlı hava: ${liveWeatherBySite[active.id] ? `${liveWeatherBySite[active.id].temperature}°C, %${liveWeatherBySite[active.id].humidity} nem` : "veri bekleniyor"}`,
     `SoilGrids: ${soilDataBySite[active.id] ? `pH ${soilDataBySite[active.id].ph}, kil ${soilDataBySite[active.id].clay} g/kg` : "veri bekleniyor"}`,
@@ -699,6 +864,8 @@ function renderMap(calculatedSites) {
       }
     }
   ).addTo(map);
+  const bounds = siteLayer.getBounds();
+  if (bounds.isValid()) map.fitBounds(bounds.pad(0.16));
 }
 
 function getLayerColor(site) {
@@ -723,9 +890,12 @@ function getLayerColor(site) {
 function createMap() {
   if (!window.L) return;
   map = L.map("leaflet-map", { scrollWheelZoom: false }).setView([38.7, 33.2], 6);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  standardBaseLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap"
   }).addTo(map);
+  satelliteBaseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri"
+  });
 }
 
 function renderAll() {
@@ -744,6 +914,7 @@ function renderAll() {
   renderScenarioComparison(active);
   renderQualityPanel(active);
   renderReport(active);
+  renderSiteMedia(active);
   renderMap(calculatedSites);
 }
 
@@ -836,6 +1007,15 @@ Object.values(inputs).forEach((input) => {
 elements.downloadReport?.addEventListener("click", downloadReport);
 elements.downloadPdf?.addEventListener("click", downloadPdfReport);
 elements.printReport?.addEventListener("click", () => window.print());
+elements.datasetUpload?.addEventListener("change", (event) => handleDatasetUpload(event.target.files?.[0]));
+elements.exportDataset?.addEventListener("click", exportCurrentDataset);
+elements.resetDataset?.addEventListener("click", resetDataset);
+elements.siteImageUpload?.addEventListener("change", (event) => handleSiteImageUpload(event.target.files?.[0]));
+elements.languageToggle?.addEventListener("click", () => {
+  activeLanguage = activeLanguage === "tr" ? "en" : "tr";
+  localStorage.setItem(storageKeys.language, activeLanguage);
+  applyLanguage();
+});
 
 document.querySelectorAll("[data-layer]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -843,6 +1023,23 @@ document.querySelectorAll("[data-layer]").forEach((button) => {
     document.querySelectorAll("[data-layer]").forEach((item) => item.classList.toggle("is-active", item === button));
     renderAll();
   });
+});
+
+document.querySelector("[data-basemap]")?.addEventListener("click", (event) => {
+  if (!map || !standardBaseLayer || !satelliteBaseLayer) return;
+  const button = event.currentTarget;
+  activeBasemap = activeBasemap === "standard" ? "satellite" : "standard";
+  if (activeBasemap === "satellite") {
+    map.removeLayer(standardBaseLayer);
+    satelliteBaseLayer.addTo(map);
+    button.classList.add("is-active");
+    button.textContent = "Standart Harita";
+  } else {
+    map.removeLayer(satelliteBaseLayer);
+    standardBaseLayer.addTo(map);
+    button.classList.remove("is-active");
+    button.textContent = "Uydu Altlığı";
+  }
 });
 
 document.addEventListener("click", (event) => {
@@ -861,17 +1058,23 @@ document.addEventListener("click", (event) => {
 });
 
 async function init() {
-  try {
-    const response = await fetch("data/afforestation-sites.geojson");
-    const geojson = await response.json();
-    sites = geojson.features.map((feature) => ({ ...feature.properties, geometry: feature.geometry.coordinates }));
-  } catch (error) {
-    console.warn("Yerel saha verisi yüklenemedi, yedek veri kullanılıyor.", error);
+  const hasStoredSites = loadStoredSites();
+  if (!hasStoredSites) {
+    try {
+      const response = await fetch("data/afforestation-sites.geojson");
+      const geojson = await response.json();
+      sites = geojson.features.map((feature) => ({ ...feature.properties, geometry: feature.geometry.coordinates }));
+      defaultSites = sites;
+    } catch (error) {
+      console.warn("Yerel saha verisi yüklenemedi, yedek veri kullanılıyor.", error);
+    }
   }
   populateSiteSelect();
   syncInputsFromSite(sites[0]);
   createMap();
   await loadOgmForestAssets();
+  applyLanguage();
+  persistSites();
   renderAll();
   await loadLiveWeather();
   await loadSoilDataForActiveSite();

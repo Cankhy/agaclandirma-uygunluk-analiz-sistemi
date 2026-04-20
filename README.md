@@ -6,6 +6,8 @@ Canlı demo: [cankhy.github.io/agaclandirma-uygunluk-analiz-sistemi](https://can
 
 ![Proje önizleme](assets/portfolio-preview.svg)
 
+![Demo akışı](assets/demo-flow.svg)
+
 Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi kriterlerinden uygunluk skoru, tür önerisi, uygulama zorluğu, saha takvimi ve rapor çıktısı üreten profesyonel bir portföy ürünüdür.
 
 ## Öne Çıkan Modüller
@@ -24,6 +26,11 @@ Bu proje, ağaçlandırma planlamasını yalnızca haritada göstermeyen; arazi 
 - Saha öncelik matrisi ve karşılaştırmalı analiz
 - İklim senaryosu kıyaslama paneli
 - Veri güveni, bakım sınıfı ve tutma başarısı kontrol paneli
+- GeoJSON ve SHP ZIP ile gerçek saha poligonu yükleme
+- Tarayıcıda çalışan yerel saha veritabanı, dışa aktarma ve demo veriye dönme akışı
+- Haritada standart/uydu altlığı değişimi
+- Saha fotoğrafı veya uydu ekran görüntüsü ekleme
+- Türkçe/İngilizce hızlı dil düğmesi
 - Rapor metni indirme ve yazdırılabilir görünüm
 - jsPDF ile PDF rapor oluşturma
 - Tarayıcı önbelleği ile canlı servis çağrılarını azaltma
@@ -58,6 +65,8 @@ npm run lint
 - `data/ogm-public-forest-assets.json`: Resmî OGM orman varlığı sayfalarından derlenen açık referans kayıtları
 
 Veri setinde farklı iklim, topoğrafya, erozyon ve erişim karakterlerine sahip örnek sahalar bulunur. Sahalar prototip amacıyla modellenmiştir.
+
+Kullanıcı kendi GeoJSON veya SHP ZIP saha dosyasını yükleyebilir. Yüklenen saha verisi tarayıcıdaki yerel veritabanında saklanır, istenirse GeoJSON olarak dışa aktarılır veya demo veriye geri dönülür. GitHub Pages statik çalıştığı için sunucu tarafı veritabanı yerine portföye uygun, güvenli ve kurulumsuz bir istemci tarafı veri katmanı tercih edilmiştir.
 
 ## Gerçek Veri Kaynakları
 
