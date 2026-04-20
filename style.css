@@ -282,6 +282,46 @@ h2 {
   font-weight: 700;
 }
 
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.method-grid article {
+  min-height: 210px;
+  padding: 22px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(47, 128, 237, 0.08), transparent 32%),
+    rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  box-shadow: var(--soft-shadow);
+}
+
+.method-grid span {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 34px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(135deg, #172033, #2f80ed);
+  font-weight: 900;
+}
+
+.method-grid strong {
+  display: block;
+  font-size: 1.08rem;
+}
+
+.method-grid p {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.62;
+}
+
 .intro-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
@@ -509,7 +549,7 @@ select {
 input[type="range"] {
   min-height: auto;
   padding: 0;
-  accent-color: var(--olive);
+  accent-color: var(--leaf);
 }
 
 .site-table {
@@ -552,6 +592,46 @@ input[type="range"] {
     radial-gradient(circle at top right, rgba(47, 128, 237, 0.12), transparent 24%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(231, 238, 248, 0.72));
   border: 1px solid var(--line);
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.report-actions button {
+  min-height: 46px;
+  padding: 0 16px;
+  color: #ffffff;
+  background: #172033;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.report-actions button:first-child {
+  background: linear-gradient(135deg, #2f80ed, #5b9df5);
+}
+
+.assurance-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1.15fr);
+  gap: 24px;
+  padding: 28px;
+  border-radius: 28px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at top right, rgba(47, 128, 237, 0.22), transparent 24%),
+    linear-gradient(135deg, #111827, #24324f);
+  box-shadow: var(--shadow);
+}
+
+.assurance-panel p:last-child {
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.72;
 }
 
 .report-preview > strong {
@@ -597,11 +677,13 @@ a:focus-visible {
 
 @media (max-width: 1120px) {
   .metric-strip,
+  .method-grid,
   .intro-panel,
   .map-layout,
   .analysis-layout,
   .executive-grid,
-  .report-grid {
+  .report-grid,
+  .assurance-panel {
     grid-template-columns: 1fr;
   }
 

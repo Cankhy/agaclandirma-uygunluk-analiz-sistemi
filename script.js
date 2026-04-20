@@ -28,7 +28,9 @@ const elements = {
   factorList: document.querySelector("#factor-list"),
   speciesList: document.querySelector("#species-list"),
   siteTable: document.querySelector("#site-table"),
-  reportPreview: document.querySelector("#report-preview")
+  reportPreview: document.querySelector("#report-preview"),
+  downloadReport: document.querySelector("#download-report"),
+  printReport: document.querySelector("#print-report")
 };
 
 const fallbackSites = [
@@ -171,9 +173,9 @@ function normalizeAccess(value) {
 }
 
 function classify(score) {
-  if (score >= 76) return { label: "Yüksek uygunluk", tone: "high", color: "#6f9b64" };
-  if (score >= 58) return { label: "Koşullu uygun", tone: "medium", color: "#8aa35b" };
-  return { label: "Düşük uygunluk", tone: "low", color: "#b67a49" };
+  if (score >= 76) return { label: "Yüksek uygunluk", tone: "high", color: "#2f80ed" };
+  if (score >= 58) return { label: "Koşullu uygun", tone: "medium", color: "#64748b" };
+  return { label: "Düşük uygunluk", tone: "low", color: "#b86b35" };
 }
 
 function calculateSite(site) {
@@ -314,6 +316,45 @@ function renderReport(active) {
   `;
 }
 
+function getReportText() {
+  const active = calculateSite(getActiveInputSite());
+  const species = getRecommendedSpecies(active);
+  const factors = Object.entries(active.factors).map(([name, value]) => `${name}: ${value}/100`).join("\n");
+  return [
+    "Ağaçlandırma Uygunluk Analiz Sistemi",
+    "",
+    `Saha: ${active.name}`,
+    `Konum: ${active.district}`,
+    `Makro bölge: ${active.macroRegion}`,
+    `Uygunluk skoru: ${active.score}/100`,
+    `Sınıf: ${active.classInfo.label}`,
+    `Ana baskı: ${active.pressure}`,
+    "",
+    "Kriter skorları:",
+    factors,
+    "",
+    "Önerilen türler:",
+    ...species.map((item, index) => `${index + 1}. ${item.name} - uyum ${Math.round(item.fit)}/100 - ${item.note}`),
+    "",
+    "Uygulama notu:",
+    active.classInfo.tone === "high"
+      ? "Saha öncelikli uygulama havuzuna alınabilir."
+      : active.classInfo.tone === "medium"
+        ? "Saha koşullu uygundur; iyileştirme önlemleriyle desteklenmelidir."
+        : "Saha düşük uygunluk göstermektedir; ön hazırlık ve alternatif senaryolar incelenmelidir."
+  ].join("\n");
+}
+
+function downloadReport() {
+  const blob = new Blob([getReportText()], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "agaclandirma-uygunluk-raporu.txt";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 function renderMap(calculatedSites) {
   if (!map || !window.L) return;
   if (siteLayer) siteLayer.remove();
@@ -381,6 +422,9 @@ Object.values(inputs).forEach((input) => {
     renderAll();
   });
 });
+
+elements.downloadReport?.addEventListener("click", downloadReport);
+elements.printReport?.addEventListener("click", () => window.print());
 
 async function init() {
   try {
