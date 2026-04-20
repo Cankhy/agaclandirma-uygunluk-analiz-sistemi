@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Ağaçlandırma Uygunluk">
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#253629"/>
+      <stop offset="1" stop-color="#8aa35b"/>
+    </linearGradient>
+    <linearGradient id="soil" x1="20" y1="62" x2="76" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c79860"/>
+      <stop offset="1" stop-color="#f8efd8"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="26" fill="url(#bg)"/>
+  <path d="M18 70c18-8 42-9 60 0v9H18v-9Z" fill="url(#soil)"/>
+  <path d="M48 68V38" stroke="#f8efd8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M47 40c-12-2-20-10-22-24 15 1 24 9 27 22l-5 2Z" fill="#dbe9bf"/>
+  <path d="M50 42c13-1 22-9 25-22-15 0-25 8-30 20l5 2Z" fill="#f0e2a8"/>
+  <circle cx="48" cy="48" r="5" fill="#253629"/>
+</svg>

@@ -8,7 +8,11 @@ const files = {
   css: path.join(root, "style.css"),
   js: path.join(root, "script.js"),
   geojson: path.join(root, "data", "afforestation-sites.geojson"),
-  readme: path.join(root, "README.md")
+  readme: path.join(root, "README.md"),
+  manifest: path.join(root, "site.webmanifest"),
+  favicon: path.join(root, "assets", "favicon.svg"),
+  robots: path.join(root, "robots.txt"),
+  sitemap: path.join(root, "sitemap.xml")
 };
 
 let failed = false;
@@ -35,6 +39,7 @@ const html = read(files.html);
 const css = read(files.css);
 const js = read(files.js);
 const readme = read(files.readme);
+const manifest = JSON.parse(read(files.manifest));
 let geojson;
 
 try {
@@ -47,6 +52,12 @@ if (html.includes('id="leaflet-map"') && html.includes('id="species-list"') && h
   ok("HTML includes map, species recommendation, and report modules");
 } else {
   fail("HTML must include map, species recommendation, and report modules");
+}
+
+if (html.includes("<link rel=\"canonical\"") && html.includes("<link rel=\"icon\"") && html.includes("<link rel=\"manifest\"")) {
+  ok("HTML includes publishing metadata");
+} else {
+  fail("HTML must include canonical, favicon, and manifest metadata");
 }
 
 if (html.includes("Ağaçlandırma") && html.includes("Uygunluk") && html.includes("Tür öneri motoru")) {
@@ -84,6 +95,18 @@ if (readme.includes("Ağaçlandırma Uygunluk Analiz Sistemi") && readme.include
   ok("README describes the project and verification command");
 } else {
   fail("README must describe the project and lint command");
+}
+
+if (manifest?.name && Array.isArray(manifest.icons) && fs.existsSync(files.favicon)) {
+  ok("Manifest and favicon are present");
+} else {
+  fail("Manifest and favicon must be configured");
+}
+
+if (read(files.robots).includes("Allow: /") && read(files.sitemap).includes("https://cankhy.github.io/agaclandirma-uygunluk-analiz-sistemi/")) {
+  ok("Robots and sitemap files are present");
+} else {
+  fail("Robots and sitemap files must reference the live site");
 }
 
 if (failed) process.exit(1);
