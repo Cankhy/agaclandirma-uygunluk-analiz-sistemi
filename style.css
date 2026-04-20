@@ -1,18 +1,20 @@
 :root {
-  --bg: #f4f0e6;
-  --paper: #fffdf4;
-  --panel: #fbf8ec;
-  --ink: #22271f;
-  --muted: #717567;
-  --line: rgba(42, 54, 38, 0.14);
-  --forest: #223426;
-  --forest-2: #31462f;
-  --olive: #68784c;
-  --leaf: #8ba35d;
-  --earth: #ad7145;
-  --cream: #f4e6c5;
-  --shadow: 0 24px 70px rgba(49, 48, 37, 0.12);
-  --soft-shadow: 0 12px 34px rgba(49, 48, 37, 0.08);
+  --bg: #f5f1e6;
+  --paper: #fffaf0;
+  --panel: #fff8ea;
+  --ink: #253026;
+  --muted: #747767;
+  --line: rgba(75, 91, 64, 0.15);
+  --forest: #244032;
+  --forest-2: #355b47;
+  --olive: #78915a;
+  --leaf: #9ab56b;
+  --earth: #bf8050;
+  --clay: #d99a62;
+  --cream: #f7e4b5;
+  --sky: #dfe9dd;
+  --shadow: 0 24px 70px rgba(61, 70, 49, 0.12);
+  --soft-shadow: 0 12px 34px rgba(61, 70, 49, 0.08);
 }
 
 * {
@@ -29,8 +31,9 @@ body {
   color: var(--ink);
   font-family: "Instrument Sans", sans-serif;
   background:
-    radial-gradient(circle at top right, rgba(139, 163, 93, 0.16), transparent 26%),
-    linear-gradient(180deg, #faf7ed 0%, #eef0df 52%, #f7efdf 100%);
+    radial-gradient(circle at 12% 8%, rgba(217, 154, 98, 0.16), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(154, 181, 107, 0.18), transparent 26%),
+    linear-gradient(180deg, #fffaf0 0%, #edf3e5 48%, #f8eddc 100%);
 }
 
 button,
@@ -84,8 +87,8 @@ h2,
   justify-content: space-between;
   gap: 16px;
   padding: 10px min(6vw, 72px);
-  color: rgba(255, 255, 255, 0.8);
-  background: var(--forest);
+  color: rgba(255, 250, 240, 0.86);
+  background: linear-gradient(90deg, #244032, #42664d);
   font-size: 0.84rem;
   font-weight: 700;
 }
@@ -99,7 +102,7 @@ h2,
   justify-content: space-between;
   gap: 24px;
   padding: 18px min(6vw, 72px);
-  background: rgba(255, 253, 244, 0.92);
+  background: rgba(255, 250, 240, 0.94);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(16px);
 }
@@ -126,7 +129,7 @@ h2,
   place-items: center;
   border-radius: 16px;
   color: var(--forest);
-  background: linear-gradient(135deg, #ffe8af, #dbe7be);
+  background: linear-gradient(135deg, #f7d88d, #dfe9bd);
   font-weight: 700;
 }
 
@@ -144,7 +147,7 @@ h2,
 }
 
 .nav-links a:hover {
-  background: rgba(104, 120, 76, 0.12);
+  background: rgba(120, 145, 90, 0.13);
 }
 
 .hero {
@@ -152,20 +155,28 @@ h2,
   display: grid;
   align-items: center;
   padding: 70px min(6vw, 72px);
-  color: #fff8e6;
+  color: #fffaf0;
   background:
-    linear-gradient(90deg, rgba(13, 22, 17, 0.88), rgba(32, 52, 39, 0.62), rgba(75, 90, 52, 0.3)),
-    radial-gradient(circle at 80% 20%, rgba(244, 230, 197, 0.26), transparent 24%),
-    linear-gradient(135deg, #17231b, #30482e 48%, #8b7048 100%);
+    radial-gradient(circle at 82% 24%, rgba(247, 216, 141, 0.34), transparent 21%),
+    radial-gradient(circle at 70% 80%, rgba(154, 181, 107, 0.24), transparent 28%),
+    linear-gradient(105deg, rgba(26, 45, 35, 0.96), rgba(47, 84, 63, 0.82) 45%, rgba(190, 128, 80, 0.56)),
+    linear-gradient(135deg, #23382b, #42664d 55%, #c48b57 100%);
   overflow: hidden;
 }
 
 .hero::before {
   content: "";
   position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(7, 16, 12, 0.26), transparent 52%),
+    repeating-linear-gradient(135deg, rgba(255, 250, 240, 0.06) 0 1px, transparent 1px 18px);
+  pointer-events: none;
 }
 
 .hero-overlay {
+  position: relative;
+  z-index: 1;
   max-width: 920px;
 }
 
@@ -194,7 +205,7 @@ h2 {
 .hero-copy {
   max-width: 680px;
   margin-top: 22px;
-  color: rgba(255, 248, 230, 0.84);
+  color: rgba(255, 250, 240, 0.86);
   font-size: 1.12rem;
   line-height: 1.72;
 }
@@ -218,13 +229,13 @@ h2 {
 
 .primary-action {
   color: var(--forest);
-  background: linear-gradient(135deg, #f5cf7b, #f7e6b7);
+  background: linear-gradient(135deg, #f5c76f, #f9e5ab);
 }
 
 .secondary-action {
-  color: #fff8e6;
-  border: 1px solid rgba(255, 248, 230, 0.34);
-  background: rgba(255, 248, 230, 0.08);
+  color: #fffaf0;
+  border: 1px solid rgba(255, 250, 240, 0.38);
+  background: rgba(255, 250, 240, 0.1);
 }
 
 .page-content {
@@ -247,13 +258,15 @@ h2 {
 .panel,
 .intro-panel {
   border: 1px solid var(--line);
-  background: rgba(255, 253, 244, 0.86);
+  background: rgba(255, 250, 240, 0.88);
   box-shadow: var(--soft-shadow);
 }
 
 .metric-strip article {
   padding: 20px;
   border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 250, 240, 0.94), rgba(237, 243, 229, 0.86));
 }
 
 .metric-strip span {
@@ -276,6 +289,9 @@ h2 {
   align-items: end;
   padding: 28px;
   border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(154, 181, 107, 0.18), transparent 28%),
+    rgba(255, 250, 240, 0.9);
 }
 
 .intro-panel p:last-child,
@@ -295,6 +311,8 @@ h2 {
 .panel {
   padding: 24px;
   border-radius: 28px;
+  background:
+    linear-gradient(135deg, rgba(255, 250, 240, 0.9), rgba(246, 241, 226, 0.82));
 }
 
 .panel-heading {
@@ -388,7 +406,7 @@ h2 {
   border-radius: 18px;
   color: var(--forest);
   line-height: 1.65;
-  background: linear-gradient(135deg, rgba(221, 231, 202, 0.86), rgba(255, 246, 220, 0.82));
+  background: linear-gradient(135deg, rgba(223, 233, 189, 0.72), rgba(249, 229, 171, 0.6));
   border: 1px solid var(--line);
 }
 
@@ -426,7 +444,7 @@ h2 {
 .bar span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--olive), var(--leaf));
+  background: linear-gradient(90deg, var(--forest-2), var(--leaf));
 }
 
 .executive-grid {
@@ -440,7 +458,7 @@ h2 {
 .report-row {
   padding: 16px;
   border-radius: 18px;
-  background: rgba(255, 252, 242, 0.68);
+  background: rgba(255, 252, 242, 0.74);
   border: 1px solid var(--line);
 }
 
@@ -530,7 +548,9 @@ input[type="range"] {
   margin-top: 18px;
   padding: 20px;
   border-radius: 22px;
-  background: linear-gradient(135deg, rgba(255, 252, 242, 0.8), rgba(233, 237, 214, 0.76));
+  background:
+    radial-gradient(circle at top right, rgba(154, 181, 107, 0.16), transparent 24%),
+    linear-gradient(135deg, rgba(255, 252, 242, 0.86), rgba(244, 230, 197, 0.58));
   border: 1px solid var(--line);
 }
 
@@ -560,7 +580,7 @@ input[type="range"] {
   gap: 16px;
   padding: 26px min(6vw, 72px);
   color: rgba(255, 255, 255, 0.78);
-  background: var(--forest);
+  background: linear-gradient(90deg, #244032, #42664d);
 }
 
 .site-footer strong {
